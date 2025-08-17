@@ -5,27 +5,32 @@ const branches = [
   {
     name: "Mechanical Engineering",
     description:
-      "Interns will focus on design, thermal systems, manufacturing processes, and innovative solutions for energy systems.",
+      "Interns focus on design, thermal systems, manufacturing processes, and innovative solutions for energy systems.",
+    symbol: "⚙️",
   },
   {
     name: "Electrical Engineering",
     description:
-      "Interns will gain expertise in power systems, circuit design, smart grids, and industrial electrical solutions.",
+      "Gain expertise in power systems, circuit design, smart grids, and industrial electrical solutions.",
+    symbol: "⚡",
   },
   {
     name: "Electronics Engineering",
     description:
-      "Interns will explore embedded systems, IoT, VLSI design, and advanced electronic applications.",
+      "Explore embedded systems, IoT, VLSI design, and advanced electronic applications.",
+    symbol: "🔌",
   },
   {
     name: "Computer Science & Engineering",
     description:
-      "Interns will work on AI, machine learning, full-stack development, and automation in industrial systems.",
+      "Work on AI, machine learning, full-stack development, and automation in industrial systems.",
+    symbol: "💻",
   },
   {
     name: "MBA (Management)",
     description:
-      "Interns will learn corporate strategies, project management, business development, and organizational leadership.",
+      "Learn corporate strategies, project management, business development, and organizational leadership.",
+    symbol: "📊",
   },
 ];
 
@@ -35,44 +40,50 @@ export default function About() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-black via-gray-900 to-blue-900 py-20">
+      <section className="relative bg-black py-20">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-6xl font-extrabold text-blue-400 mb-6">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-blue-400 mb-6">
             About Our Internship Program
           </h2>
           <p className="text-lg md:text-xl max-w-3xl mx-auto text-gray-300 leading-relaxed">
-            Aartech Solonics Limited welcomes passionate interns from diverse engineering
-            and management branches. This internship begins on{" "}
-            <span className="font-semibold text-blue-300">11 August</span> and aims to
-            provide industry-ready skills, mentorship, and innovation opportunities.
+            Aartech Solonics Limited welcomes passionate interns from diverse
+            engineering and management branches. This internship begins on{" "}
+            <span className="font-semibold text-blue-300">11 August</span> and
+            aims to provide{" "}
+            <span className="text-white font-semibold">
+              industry-ready skills, mentorship, and innovation opportunities.
+            </span>
           </p>
         </div>
       </section>
 
       {/* Branch Cards */}
       <section className="flex-grow bg-black py-16">
-        <div className="max-w-7xl mx-auto px-6 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="max-w-7xl mx-auto px-6 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
           {branches.map((branch, index) => (
             <div
               key={index}
-              className="bg-gradient-to-br from-gray-900 to-blue-950 rounded-2xl shadow-lg p-6 border border-blue-700 hover:scale-105 transition transform"
+              className="flex flex-col justify-start bg-gray-900 rounded-2xl shadow-md p-6 border border-gray-800 hover:border-blue-500 transition-all duration-300"
             >
-              <h3 className="text-2xl font-bold text-blue-400 mb-3">{branch.name}</h3>
-              <p className="text-gray-300">{branch.description}</p>
+              <div className="text-4xl mb-3 text-blue-400">{branch.symbol}</div>
+              <h3 className="text-2xl font-bold text-blue-400 mb-3">
+                {branch.name}
+              </h3>
+              <p className="text-gray-300 leading-relaxed">{branch.description}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Closing Note */}
-      <section className="bg-gradient-to-r from-blue-900 to-black py-20">
-        <div className="max-w-4xl mx-auto text-center px-6">
+      <section className="bg-black py-20 text-center">
+        <div className="max-w-4xl mx-auto px-6">
           <h3 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Building the Future, Together
           </h3>
           <p className="text-gray-300 text-lg leading-relaxed">
-            This program is designed not only to give technical exposure but also to
-            empower interns with professional skills, teamwork, and innovative thinking.
+            This program is designed to give technical exposure while empowering
+            interns with professional skills, teamwork, and innovative thinking.
             Join us in creating a smarter, sustainable tomorrow.
           </p>
         </div>
