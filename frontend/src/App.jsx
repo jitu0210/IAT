@@ -7,6 +7,9 @@ import Developer from "./pages/Developer.jsx"
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx"
 import Achievements from "./pages/Acheivements.jsx";
+import Groups from "./pages/Groups.jsx";
+import Interns from "./pages/Interns.jsx";
+import Projects from "./pages/Projects.jsx";
 
 function App() {
   return (
@@ -20,6 +23,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/achievements" element={<Achievements />} />
+        <Route path="/groups" element={<Groups />} />
+        <Route path="/interns" element={<Interns />} />
+        <Route path="/projects" element={<Projects />} />
       </Routes>
     </BrowserRouter>
   );
