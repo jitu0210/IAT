@@ -1,9 +1,17 @@
-import React from 'react'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Form from "./pages/Form.jsx"
 
-const App = () => {
+function App() {
   return (
-    <div>Appjgjgg</div>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/interns-form" element={<Form />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
-
-export default App
+export default App;
