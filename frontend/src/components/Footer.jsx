@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-// Replace with your logo path
+
 
 export default function Footer() {
   return (
@@ -28,7 +28,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Quick Links */}
+          
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm">
@@ -39,7 +39,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Resources */}
+          
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Resources</h3>
             <ul className="space-y-2 text-sm">

@@ -16,10 +16,8 @@ import axios from "axios";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
-/* --------- Colors (dark blue theme) --------- */
 const COLORS = ["#60A5FA", "#34D399", "#FBBF24", "#F87171", "#A78BFA"];
 
-/* --------- Default placeholder data --------- */
 const DEFAULT_INTERNS = [
   { name: "Mechanical", value: 0 },
   { name: "Electrical", value: 0 },
@@ -54,7 +52,7 @@ export default function Dashboard() {
   useEffect(() => {
     // Interns by department
     axios
-      .get("") // 🔗 interns-by-department endpoint
+      .get("") // interns-by-department endpoint
       .then((res) => {
         if (Array.isArray(res.data) && res.data.length) setInternsData(res.data);
       })
