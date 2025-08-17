@@ -281,7 +281,12 @@ export default function Dashboard() {
             <li>50+ interns hired full-time</li>
             <li>Expanded operations across multiple industries</li>
           </ul>
-          <button className="mt-4 px-4 py-2 bg-green-600 hover:bg-green-700 rounded font-semibold">See More Achievements</button>
+          <button
+      onClick={() => navigate("/achievements")}
+      className="mt-4 px-4 py-2 bg-green-600 hover:bg-green-700 rounded font-semibold"
+    >
+      See More Achievements
+    </button>
         </div>
       </main>
       <Footer />

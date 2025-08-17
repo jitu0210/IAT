@@ -6,6 +6,7 @@ import Home from "./pages/Home.jsx";
 import Developer from "./pages/Developer.jsx"
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx"
+import Achievements from "./pages/Acheivements.jsx";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/developers" element={<Developer />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/achievements" element={<Achievements />} />
       </Routes>
     </BrowserRouter>
   );
