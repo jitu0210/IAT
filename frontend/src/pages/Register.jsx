@@ -9,6 +9,7 @@ export default function Register() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [branch, setBranch] = useState(""); // ✅ New state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -20,11 +21,15 @@ export default function Register() {
     setSuccess("");
 
     try {
-      const response = await axios.post("https://your-backend-api.com/register", {
-        username,
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "http://localhost:8000/api/v1/user/register",
+        {
+          username,
+          email,
+          password,
+          branch, 
+        }
+      );
 
       setSuccess("Registration successful! Redirecting to login...");
       setTimeout(() => {
@@ -41,7 +46,7 @@ export default function Register() {
     <div className="bg-black text-white min-h-screen flex flex-col">
       <Header />
 
-      <section className="flex-grow flex items-center justify-center py-20">
+      <section className="flex-grow flex items-center justify-center py-10 px-5">
         <div className="bg-gray-900 rounded-2xl shadow-lg p-10 w-full max-w-md">
           <h2 className="text-3xl font-bold text-blue-400 mb-6 text-center">
             Register
@@ -60,6 +65,7 @@ export default function Register() {
           )}
 
           <form onSubmit={handleRegister} className="space-y-5">
+            {/* Username */}
             <div>
               <label className="block text-gray-300 mb-1">Username</label>
               <input
@@ -71,6 +77,7 @@ export default function Register() {
               />
             </div>
 
+            {/* Email */}
             <div>
               <label className="block text-gray-300 mb-1">Email</label>
               <input
@@ -82,6 +89,7 @@ export default function Register() {
               />
             </div>
 
+            {/* Password */}
             <div>
               <label className="block text-gray-300 mb-1">Password</label>
               <input
@@ -93,6 +101,25 @@ export default function Register() {
               />
             </div>
 
+            {/* Department Dropdown */}
+            <div>
+              <label className="block text-gray-300 mb-1">Branch</label>
+              <select
+                value={branch}
+                onChange={(e) => setBranch(e.target.value)}
+                required
+                className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:border-blue-400 focus:outline-none"
+              >
+                <option value="">Select Department</option>
+                <option value="MBA">MBA</option>
+                <option value="Electrical">Electrical</option>
+                <option value="Electronics">Electronics</option>
+                <option value="CSE">CSE</option>
+                <option value="Mechanical">Mechanical</option>
+              </select>
+            </div>
+
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}

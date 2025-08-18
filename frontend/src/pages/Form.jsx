@@ -1,62 +1,47 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import axios from "axios";
 
-export default function Form({ userId = "user123" }) {
+export default function Form() {
   const [formData, setFormData] = useState({
     name: "",
     branch: "",
     activities: "",
     date: new Date(),
-    userId,
   });
 
   const [submitted, setSubmitted] = useState(false);
-  const [isBlocked, setIsBlocked] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Check if user already submitted within 24 hrs
-  useEffect(() => {
-    const lastSubmit = localStorage.getItem("lastSubmit_" + userId);
-    if (lastSubmit) {
-      const diff = Date.now() - parseInt(lastSubmit);
-      if (diff < 24 * 60 * 60 * 1000) {
-        setIsBlocked(true);
-        setSubmitted(true);
-      }
-    }
-  }, [userId]);
-
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isBlocked) return;
-
+    setLoading(true);
     try {
-      await axios.post("http://localhost:5000/api/interns", formData);
-      setSubmitted(true);
-      localStorage.setItem("lastSubmit_" + userId, Date.now().toString());
-      setIsBlocked(true);
+      await axios.post(
+        "http://localhost:8000/api/v1/form/submit-form",
+        formData
+      );
+      setSubmitted(true); // Google Forms-style submission success
     } catch (err) {
-      console.error(err);
-      alert("❌ Submission failed, check backend");
+      alert(err.response?.data?.message || "Submission failed");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // After Submission Page
   if (submitted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f3f1f7]">
         <div className="bg-white max-w-xl w-full p-10 rounded-lg shadow-md border-t-[10px] border-purple-700 text-center">
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-            Your response has been recorded.
+            You have already submitted your response
           </h2>
           <p className="text-gray-600">
-            You can submit again after{" "}
-            <span className="font-semibold">24 hours</span>.
+            Thank you for your submission! You can submit again after 12 hours.
           </p>
         </div>
       </div>
@@ -66,25 +51,20 @@ export default function Form({ userId = "user123" }) {
   return (
     <div className="min-h-screen bg-[#ede6f9] flex justify-center py-10 px-4">
       <div className="max-w-2xl w-full">
-        {/* Header */}
         <div className="bg-white rounded-t-lg shadow-md border-t-[12px] border-purple-700 p-8">
           <h1 className="text-3xl font-bold mb-2 text-gray-800">
             Intern Activity Tracker
           </h1>
-          <p className="text-gray-600">
-            This form helps to track daily activities of an intern.
-          </p>
+          <p className="text-gray-600">Track daily activities of interns.</p>
         </div>
 
-        {/* Form */}
         <form
           onSubmit={handleSubmit}
           className="bg-white mt-2 rounded-b-lg shadow-md p-8 space-y-8"
         >
-          {/* Name */}
           <div>
             <label className="block text-lg font-medium mb-2">
-              Name <span className="text-red-500">*</span>
+              Name *
             </label>
             <input
               type="text"
@@ -92,22 +72,20 @@ export default function Form({ userId = "user123" }) {
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full border-b border-gray-400 focus:border-purple-600 outline-none p-2 text-gray-700"
-              placeholder="Short answer text"
+              className="w-full border-b border-gray-400 focus:border-purple-600 outline-none p-2"
             />
           </div>
 
-          {/* Branch */}
           <div>
             <label className="block text-lg font-medium mb-2">
-              Branch <span className="text-red-500">*</span>
+              Branch *
             </label>
             <select
               name="branch"
               value={formData.branch}
               onChange={handleChange}
               required
-              className="w-full border-b border-gray-400 focus:border-purple-600 outline-none p-2 bg-white text-gray-700"
+              className="w-full border-b border-gray-400 focus:border-purple-600 outline-none p-2"
             >
               <option value="">Select Branch</option>
               <option value="CSE">CSE</option>
@@ -118,10 +96,9 @@ export default function Form({ userId = "user123" }) {
             </select>
           </div>
 
-          {/* Activities */}
           <div>
             <label className="block text-lg font-medium mb-2">
-              Activities <span className="text-red-500">*</span>
+              Activities *
             </label>
             <textarea
               name="activities"
@@ -129,49 +106,29 @@ export default function Form({ userId = "user123" }) {
               value={formData.activities}
               onChange={handleChange}
               required
-              className="w-full border-b border-gray-400 focus:border-purple-600 outline-none p-2 resize-none text-gray-700"
-              placeholder="Paragraph text"
+              className="w-full border-b border-gray-400 focus:border-purple-600 outline-none p-2 resize-none"
             />
           </div>
 
-          {/* Date Picker (Fixed for Mobile) */}
-          <div className="relative">
+          <div>
             <label className="block text-lg font-medium mb-2">
-              Date <span className="text-red-500">*</span>
+              Date *
             </label>
-            <div className="relative">
-              <DatePicker
-                selected={formData.date}
-                onChange={(date) => setFormData({ ...formData, date })}
-                dateFormat="dd/MM/yyyy"
-                className="w-full border-b border-gray-400 focus:border-purple-600 outline-none p-2 bg-white text-gray-700"
-                wrapperClassName="w-full"
-                popperPlacement="bottom-start"
-                popperModifiers={[
-                  {
-                    name: "preventOverflow",
-                    options: {
-                      boundary: "viewport",
-                    },
-                  },
-                ]}
-              />
-            </div>
+            <DatePicker
+              selected={formData.date}
+              onChange={(date) => setFormData({ ...formData, date })}
+              dateFormat="dd/MM/yyyy"
+              className="w-full border-b border-gray-400 focus:border-purple-600 outline-none p-2"
+            />
           </div>
 
-          {/* Submit */}
           <div>
             <button
               type="submit"
-              disabled={isBlocked}
-              className={`px-6 py-2 rounded font-semibold transition w-full sm:w-auto
-                ${
-                  isBlocked
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-purple-700 hover:bg-purple-800 text-white"
-                }`}
+              disabled={loading}
+              className="px-6 py-2 rounded font-semibold transition w-full sm:w-auto bg-purple-700 hover:bg-purple-800 text-white"
             >
-              Submit
+              {loading ? "Submitting..." : "Submit"}
             </button>
           </div>
         </form>

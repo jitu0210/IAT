@@ -6,18 +6,18 @@ const contacts = [
   {
     title: "HR Contact",
     color: "blue-400",
-    name: "Anjali Sharma",
-    email: "hr@company.com",
-    phone: "+91 98765 43210",
-    office: "Aartech Solonics Limited, Bhopal, India",
+    acronym: "SAY",
+    email: "demo@hrmail.com",
+    phone: "+91 98XXX XXXXX",
+    office: "Aartech Solonics Limited, Mandideep, India",
   },
   {
     title: "Coordinator Contact",
     color: "cyan-400",
-    name: "Rohit Verma",
+    acronym: "MST",
     email: "coordinator@company.com",
-    phone: "+91 91234 56789",
-    office: "Aartech Solonics Limited, Bhopal, India",
+    phone: "+91 91XXX XXXXX",
+    office: "Aartech Solonics Limited, Mandideep, India",
   },
 ];
 
@@ -27,11 +27,10 @@ const Contact = () => {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative py-20 bg-black">
+      <section className="relative py-8 bg-black">
         <div className="relative z-10 container mx-auto px-6 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Get in{" "}
-            <span className="text-blue-400">Touch</span>
+            Get in <span className="text-blue-400">Touch</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
             Our HR and Coordinator are here to assist you with queries, support,
@@ -41,7 +40,7 @@ const Contact = () => {
       </section>
 
       {/* Contact Cards */}
-      <section className="py-16 flex-1">
+      <section className="py-5 flex-1">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-10">
             {contacts.map((contact, index) => (
@@ -54,16 +53,26 @@ const Contact = () => {
                 </h2>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-gray-400">Name</p>
-                    <p className="font-medium">{contact.name}</p>
+                    <p className="text-gray-400">Acronym</p>
+                    <p className="font-medium">{contact.acronym}</p>
                   </div>
                   <div>
                     <p className="text-gray-400">Email</p>
-                    <p className="font-medium">{contact.email}</p>
+                    <a
+                      href={`mailto:${contact.email}`}
+                      className="font-medium text-blue-400 hover:underline"
+                    >
+                      {contact.email}
+                    </a>
                   </div>
                   <div>
                     <p className="text-gray-400">Phone</p>
-                    <p className="font-medium">{contact.phone}</p>
+                    <a
+                      href={`tel:${contact.phone.replace(/\s+/g, "")}`}
+                      className="font-medium text-blue-400 hover:underline"
+                    >
+                      {contact.phone}
+                    </a>
                   </div>
                   <div>
                     <p className="text-gray-400">Office</p>
@@ -81,7 +90,12 @@ const Contact = () => {
             </h3>
             <p className="text-gray-400">
               For other queries, please email us at{" "}
-              <span className="text-blue-400">support@company.com</span>
+              <a
+                href="mailto:support@company.com"
+                className="text-blue-400 hover:underline"
+              >
+                support@company.com
+              </a>
             </p>
           </div>
 

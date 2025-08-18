@@ -40,7 +40,7 @@ export default function About() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative bg-black py-20">
+      <section className="relative bg-black py-8">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-5xl font-extrabold text-blue-400 mb-6">
             About Our Internship Program
@@ -58,7 +58,7 @@ export default function About() {
       </section>
 
       {/* Branch Cards */}
-      <section className="flex-grow bg-black py-16">
+      <section className="flex-grow bg-black py-10">
         <div className="max-w-7xl mx-auto px-6 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
           {branches.map((branch, index) => (
             <div

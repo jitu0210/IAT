@@ -17,16 +17,22 @@ export default function Login() {
     setError("");
 
     try {
-      const response = await axios.post("https://your-backend-api.com/login", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "http://localhost:8000/api/v1/user/login",
+        { email, password },
+        { withCredentials: true } // allow cookies (important if using cookies auth)
+      );
 
-      // Handle response (save token, redirect, etc.)
-      console.log(response.data);
-      navigate("/dashboard"); // Redirect after login
+      // ✅ Save token to localStorage
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+
+      console.log("Login Success:", response.data);
+
+      // ✅ Redirect user after login
+      navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      setError(err.response?.data?.error || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -36,7 +42,7 @@ export default function Login() {
     <div className="bg-black text-white min-h-screen flex flex-col">
       <Header />
 
-      <section className="flex-grow flex items-center justify-center py-20">
+      <section className="flex-grow flex items-center justify-center py-10 px-5">
         <div className="bg-gray-900 rounded-2xl shadow-lg p-10 w-full max-w-md">
           <h2 className="text-3xl font-bold text-blue-400 mb-6 text-center">
             Login

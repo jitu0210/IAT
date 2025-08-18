@@ -30,7 +30,7 @@ const developers = [
       "Bcrypt",
       "Authentication & Authorization",
     ],
-    email: "jitu.kumar@example.com",
+    email: "jitukumar63766@gmail.com",
     phone: "+91 91234 56789",
   },
 ];
@@ -41,7 +41,7 @@ export default function Developers() {
       <Header />
 
       {/* Hero Section */}
-      <section className="py-20 bg-black text-center">
+      <section className="py-8 bg-black text-center">
         <div className="max-w-4xl mx-auto px-6">
           <h1 className="text-4xl md:text-5xl font-extrabold text-blue-400 mb-4">
             Meet Our Developers
@@ -55,15 +55,19 @@ export default function Developers() {
       </section>
 
       {/* Developer Cards */}
-      <section className="flex-grow py-16">
+      <section className="flex-grow py-5">
         <div className="max-w-7xl mx-auto px-6 grid gap-10 md:grid-cols-2">
           {developers.map((dev, index) => (
             <div
               key={index}
               className="bg-gray-900 rounded-2xl p-8 border border-gray-800 shadow-md hover:shadow-blue-500/30 transition"
             >
-              <h2 className="text-2xl font-bold text-blue-400 mb-2">{dev.role}</h2>
-              <h3 className="text-xl font-semibold text-white mb-4">{dev.name}</h3>
+              <h2 className="text-2xl font-bold text-blue-400 mb-2">
+                {dev.role}
+              </h2>
+              <h3 className="text-xl font-semibold text-white mb-4">
+                {dev.name}
+              </h3>
 
               <div className="mb-4">
                 <p className="text-gray-400 font-medium mb-1">Skills:</p>
@@ -76,9 +80,19 @@ export default function Developers() {
 
               <div className="space-y-2">
                 <p className="text-gray-400 font-medium">Email:</p>
-                <p className="text-blue-400">{dev.email}</p>
+                <a
+                  href={`mailto:${dev.email}`}
+                  className="text-blue-400 hover:underline"
+                >
+                  {dev.email}
+                </a>
                 <p className="text-gray-400 font-medium">Phone:</p>
-                <p className="text-blue-400">{dev.phone}</p>
+                <a
+                  href={`tel:${dev.phone.replace(/\s+/g, "")}`}
+                  className="text-blue-400 hover:underline"
+                >
+                  {dev.phone}
+                </a>
               </div>
             </div>
           ))}
@@ -93,8 +107,22 @@ export default function Developers() {
             For any queries, suggestions, or collaboration opportunities, reach
             out to our developers directly:
           </p>
-          <p className="text-blue-400">Email: support@company.com</p>
-          <p className="text-blue-400">Phone: +91 99999 88888</p>
+          <p>
+            <a
+              href="mailto:support@company.com"
+              className="text-blue-400 hover:underline"
+            >
+              Email: support@company.com
+            </a>
+          </p>
+          <p>
+            <a
+              href="tel:+919999988888"
+              className="text-blue-400 hover:underline"
+            >
+              Phone: +91 99999 88888
+            </a>
+          </p>
         </div>
       </section>
 

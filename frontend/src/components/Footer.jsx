@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-
 export default function Footer() {
   return (
     <footer className="bg-black border-t border-gray-800 text-gray-400">
@@ -11,9 +10,7 @@ export default function Footer() {
           {/* Company Info */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="h-12 w-12">
-                
-              </div>
+              <div className="h-12 w-12">{/* Logo can go here */}</div>
               <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 text-transparent bg-clip-text">
                 Aartech Solonics
               </span>
@@ -28,7 +25,7 @@ export default function Footer() {
             </div>
           </div>
 
-          
+          {/* Quick Links */}
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm">
@@ -39,7 +36,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          
+          {/* Resources */}
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Resources</h3>
             <ul className="space-y-2 text-sm">
@@ -54,9 +51,25 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Contact Us</h3>
             <ul className="space-y-2 text-sm">
-              <li>Email: <span className="text-blue-400">hr@aartech.com</span></li>
-              <li>Phone: <span className="text-blue-400">+91 98765 43210</span></li>
-              <li>Address: Bhopal, India</li>
+              <li>
+                Email:{" "}
+                <a
+                  href="mailto:hr@aartech.com"
+                  className="text-blue-400 hover:underline"
+                >
+                  hr@aartech.com
+                </a>
+              </li>
+              <li>
+                Phone:{" "}
+                <a
+                  href="tel:+919876543210"
+                  className="text-blue-400 hover:underline"
+                >
+                  +91 98765 43210
+                </a>
+              </li>
+              <li>Address: Mandideep,Madhya Pradesh, India</li>
             </ul>
             <div className="mt-4">
               <h4 className="text-sm font-medium mb-2">Subscribe to Newsletter</h4>

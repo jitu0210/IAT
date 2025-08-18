@@ -16,20 +16,91 @@ import axios from "axios";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
-const COLORS = ["#60A5FA", "#34D399", "#FBBF24", "#F87171", "#A78BFA"];
-
-const DEFAULT_INTERNS = [
-  { name: "Mechanical", value: 0 },
-  { name: "Electrical", value: 0 },
-  { name: "Electronics", value: 0 },
-  { name: "CSE", value: 0 },
-  { name: "MBA", value: 0 },
+const COLORS = [
+  "#60A5FA",
+  "#34D399",
+  "#FBBF24",
+  "#F87171",
+  "#A78BFA",
+  "#F472B6",
+  "#10B981",
 ];
 
-const DEFAULT_PROJECTS = [
-  { id: 1, name: "Project A", description: "Demo description A", progress: 0, deadline: "2025-09-01" },
-  { id: 2, name: "Project B", description: "Demo description B", progress: 0, deadline: "2025-09-10" },
-];
+const ProgressButton = ({ projectId, currentProgress, onUpdate }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [progress, setProgress] = useState(currentProgress);
+
+  const handleSave = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/v1/projects/${projectId}/progress`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ progress }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update progress');
+      }
+
+      const updatedProject = await response.json();
+      onUpdate(projectId, updatedProject.progress);
+      setIsOpen(false);
+    } catch (err) {
+      console.error("Update failed", err);
+      alert("Failed to update progress");
+    }
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`px-3 py-1 rounded text-sm ${
+          currentProgress < 30
+            ? "bg-red-600 hover:bg-red-700"
+            : currentProgress < 70
+            ? "bg-yellow-600 hover:bg-yellow-700"
+            : "bg-green-600 hover:bg-green-700"
+        }`}
+      >
+        {currentProgress}%
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-10 mt-2 left-0 sm:left-auto sm:right-0 w-64 p-4 bg-[#1E293B] rounded-lg shadow-lg border border-blue-900/30">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm">Progress:</span>
+            <span className="font-bold">{progress}%</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={progress}
+            onChange={(e) => setProgress(parseInt(e.target.value))}
+            className="w-full mb-4"
+          />
+          <div className="flex justify-end space-x-2">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="px-3 py-1 bg-gray-600 hover:bg-gray-700 rounded text-sm"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -37,81 +108,132 @@ export default function Dashboard() {
   const [stats, setStats] = useState({
     interns: 0,
     projects: 0,
-    startDate: "-",
-    status: "-",
+    startDate: "Loading...",
+    status: "Loading...",
   });
 
-  const [internsData, setInternsData] = useState(DEFAULT_INTERNS);
-  const [projectsData, setProjectsData] = useState(DEFAULT_PROJECTS);
-
-  const [newProject, setNewProject] = useState({ name: "", description: "", deadline: "" });
-
+  const [internsData, setInternsData] = useState([]);
+  const [projectsData, setProjectsData] = useState([]);
+  const [newProject, setNewProject] = useState({
+    name: "",
+    description: "",
+    deadline: "",
+    progress: 0,
+  });
   const [activeIndex, setActiveIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const onPieEnter = useCallback((_, index) => setActiveIndex(index), []);
 
   useEffect(() => {
-    // Interns by department
-    axios
-      .get("") // interns-by-department endpoint
-      .then((res) => {
-        if (Array.isArray(res.data) && res.data.length) setInternsData(res.data);
-      })
-      .catch(() => {
-        setInternsData([
-          { name: "Mechanical", value: 10 },
-          { name: "Electrical", value: 15 },
-          { name: "Electronics", value: 12 },
-          { name: "CSE", value: 20 },
-          { name: "MBA", value: 8 },
-        ]);
-      });
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-    // Projects
-    axios
-      .get("") // 🔗 projects-progress endpoint
-      .then((res) => {
-        if (Array.isArray(res.data) && res.data.length) setProjectsData(res.data);
-      })
-      .catch(() => {
-        setProjectsData(DEFAULT_PROJECTS);
-      });
+        // Fetch interns by department
+        const internsRes = await axios.get(
+          "http://localhost:8000/api/v1/user/department-counts"
+        );
+        if (internsRes.data && internsRes.data.length) {
+          const transformedInternsData = internsRes.data.map((item) => ({
+            name: item.department,
+            value: item.count,
+          }));
+          setInternsData(transformedInternsData);
 
-    // Top stats
-    axios
-      .get("") // 🔗 top-stats endpoint
-      .then((res) => {
-        if (res?.data) setStats(res.data);
-      })
-      .catch(() => {
-        setStats({ interns: 65, projects: 16, startDate: "11 Aug", status: "Ongoing" });
-      });
+          // Calculate total interns for stats
+          const totalInterns = transformedInternsData.reduce(
+            (sum, item) => sum + item.value,
+            0
+          );
+          setStats((prev) => ({ ...prev, interns: totalInterns }));
+        } else {
+          setInternsData([]);
+        }
+
+        // Fetch projects
+        const projectsRes = await axios.get(
+          "http://localhost:8000/api/v1/projects"
+        );
+        if (projectsRes.data && projectsRes.data.length) {
+          setProjectsData(projectsRes.data);
+          setStats((prev) => ({ ...prev, projects: projectsRes.data.length }));
+        } else {
+          setProjectsData([]);
+        }
+
+        // Fetch additional stats
+        const statsRes = await axios.get("");
+        if (statsRes.data) {
+          setStats((prev) => ({ ...prev, ...statsRes.data }));
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Failed to load dashboard data. Please try again later.");
+        setInternsData([]);
+        setProjectsData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    // Set up refresh interval (every 30 seconds)
+    const intervalId = setInterval(fetchData, 30000);
+    return () => clearInterval(intervalId);
   }, []);
 
-  // --- Delete project ---
   const handleDeleteProject = async (id) => {
     try {
-      await axios.delete(``); // 🔗 delete project endpoint
+      await axios.delete(`http://localhost:8000/api/v1/projects/${id}`);
       setProjectsData((prev) => prev.filter((p) => p.id !== id));
+      setStats((prev) => ({ ...prev, projects: prev.projects - 1 }));
     } catch (err) {
       console.error("Delete failed", err);
     }
   };
 
-  // --- Add project ---
   const handleAddProject = async () => {
     if (!newProject.name || !newProject.deadline) return;
     try {
-      const res = await axios.post("", newProject); // 🔗 add project endpoint
-      const added = res.data || { ...newProject, id: Date.now(), progress: 0 };
+      const response = await fetch("http://localhost:8000/api/v1/projects", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newProject), 
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add project");
+      }
+
+      const added = await response.json();
       setProjectsData((prev) => [...prev, added]);
-      setNewProject({ name: "", description: "", deadline: "" });
+      setStats((prev) => ({ ...prev, projects: prev.projects + 1 }));
+      setNewProject({ name: "", description: "", deadline: "", progress: 0 });
     } catch (err) {
       console.error("Add failed", err);
+      alert("Failed to add project");
     }
   };
 
+  const handleUpdateProgress = (projectId, newProgress) => {
+    setProjectsData((prev) =>
+      prev.map((project) =>
+        project.id === projectId
+          ? { ...project, progress: newProgress }
+          : project
+      )
+    );
+  };
+
   const renderActiveShape = (props) => {
-    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
+    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } =
+      props;
     return (
       <g>
         <Pie
@@ -130,13 +252,37 @@ export default function Dashboard() {
     );
   };
 
+  if (loading && !internsData.length) {
+    return (
+      <div className="min-h-screen bg-[#0B1220] text-white flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-xl">Loading dashboard data...</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#0B1220] text-white flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-xl text-red-400">{error}</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0B1220] text-white flex flex-col">
       <Header />
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
         {/* Top Section */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-2xl sm:text-3xl font-bold">Internship Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
           <button
             onClick={() => navigate("/interns-form")}
             className="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 font-semibold text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400"
@@ -147,89 +293,177 @@ export default function Dashboard() {
 
         {/* Stats */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          <button onClick={() => navigate("/interns")} className="group rounded-xl bg-[#111A2E] border border-blue-900/30 p-4 text-left hover:border-blue-500/40 transition">
-            <div className="text-sm text-gray-400">Total Interns</div>
-            <div className="mt-1 text-3xl font-bold text-blue-400 group-hover:text-blue-300">{stats.interns}</div>
+          <button
+            onClick={() => navigate("/projects")}
+            className="group rounded-xl bg-[#111A2E] border border-blue-900/30 p-4 text-left hover:border-blue-500/40 transition"
+          >
+            <div className="text-lg font-bold text-white">Total Projects</div>
+            <div className="mt-1 text-3xl font-bold text-blue-400 group-hover:text-blue-300">
+              {loading ? "..." : stats.projects}
+            </div>
           </button>
 
-          <button onClick={() => navigate("/projects")} className="group rounded-xl bg-[#111A2E] border border-blue-900/30 p-4 text-left hover:border-blue-500/40 transition">
-            <div className="text-sm text-gray-400">Total Projects</div>
-            <div className="mt-1 text-3xl font-bold text-blue-400 group-hover:text-blue-300">{stats.projects}</div>
+          <button
+            onClick={() => navigate("/interns")}
+            className="group rounded-xl bg-[#111A2E] border border-blue-900/30 p-4 text-left hover:border-blue-500/40 transition"
+          >
+            <div className="text-lg font-bold text-white">Total Interns</div>
+            <div className="mt-1 text-3xl font-bold text-blue-400 group-hover:text-blue-300">
+              {loading ? "..." : stats.interns}
+            </div>
           </button>
 
-          <button onClick={() => navigate("/groups")} className="group rounded-xl bg-[#111A2E] border border-blue-900/30 p-4 text-left hover:border-blue-500/40 transition">
-            <div className="text-sm text-gray-400">Groups</div>
-            <div className="mt-1 text-3xl font-bold text-blue-400">{internsData.length}</div>
+          <button
+            onClick={() => navigate("/groups")}
+            className="group rounded-xl bg-[#111A2E] border border-blue-900/30 p-4 text-left hover:border-blue-500/40 transition"
+          >
+            <div className="text-lg font-bold text-white">Groups</div>
+            <div className="mt-1 text-3xl font-bold text-blue-400">
+              {loading ? "..." : Math.ceil(stats.interns / 5)}
+            </div>
           </button>
 
           <div className="rounded-xl bg-[#111A2E] border border-blue-900/30 p-4">
             <div className="text-sm text-gray-400">Start Date</div>
-            <div className="mt-1 text-3xl font-bold text-amber-400">{stats.startDate || "-"}</div>
+            <div className="mt-1 text-2xl font-bold text-amber-400">
+              {loading ? "..." : stats.startDate}
+            </div>
           </div>
 
           <div className="rounded-xl bg-[#111A2E] border border-blue-900/30 p-4">
             <div className="text-sm text-gray-400">Status</div>
-            <div className="mt-1 text-3xl font-bold text-indigo-300">{stats.status || "-"}</div>
+            <div className="mt-1 text-2xl font-bold text-indigo-300">
+              {loading ? "..." : stats.status}
+            </div>
           </div>
         </div>
 
         {/* Charts */}
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Pie */}
-          <div className="rounded-xl bg-[#111A2E] border border-blue-900/30 p-4">
-            <h2 className="text-lg font-semibold mb-4">Interns by Department</h2>
-            <div className="h-[320px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={internsData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={95}
-                    paddingAngle={2}
-                    activeIndex={activeIndex}
-                    activeShape={renderActiveShape}
-                    onMouseEnter={onPieEnter}
-                    onMouseLeave={() => setActiveIndex(0)}
-                  >
-                    {internsData.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                    <LabelList dataKey="value" position="outside" fill="#ffffff" />
-                  </Pie>
-                  <Tooltip
-                    cursor={false}
-                    contentStyle={{ background: "#0F172A", border: "1px solid #1E3A8A" }}
-                    labelStyle={{ color: "#E5E7EB" }}
-                    itemStyle={{ color: "#FFFFFF" }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Bar */}
+          {/* Bar Chart */}
           <div className="rounded-xl bg-[#111A2E] border border-blue-900/30 p-4">
             <h2 className="text-lg font-semibold mb-4">Projects Progress</h2>
             <div className="h-[320px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={projectsData} barSize={38}>
-                  <XAxis dataKey="name" tick={{ fill: "#9CA3AF", fontSize: 12 }} interval={0} height={60} angle={-10} textAnchor="end" />
-                  <YAxis tick={{ fill: "#9CA3AF" }} domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} />
-                  <Tooltip
-                    cursor={{ fill: "rgba(59,130,246,0.08)" }}
-                    contentStyle={{ background: "#0F172A", border: "1px solid #1E3A8A" }}
-                    labelStyle={{ color: "#E5E7EB" }}
-                    itemStyle={{ color: "#FFFFFF" }}
-                  />
-                  <Bar dataKey="progress" fill="#3B82F6" radius={[6, 6, 0, 0]} onClick={() => navigate("/projects")} className="cursor-pointer">
-                    <LabelList dataKey="progress" position="top" fill="#FFFFFF" formatter={(v) => `${v}%`} />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              {projectsData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={projectsData} barSize={38}>
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fill: "#9CA3AF", fontSize: 12 }}
+                      interval={0}
+                      height={60}
+                      angle={projectsData.length > 3 ? -10 : 0}
+                      textAnchor="end"
+                    />
+                    <YAxis
+                      tick={{ fill: "#9CA3AF" }}
+                      domain={[0, 100]}
+                      ticks={[0, 20, 40, 60, 80, 100]}
+                    />
+                    <Tooltip
+                      cursor={{ fill: "rgba(59,130,246,0.08)" }}
+                      contentStyle={{
+                        background: "#0F172A",
+                        border: "1px solid #1E3A8A",
+                      }}
+                      labelStyle={{ color: "#E5E7EB" }}
+                      itemStyle={{ color: "#FFFFFF" }}
+                      formatter={(value) => [`${value}%`, "Progress"]}
+                    />
+                    <Bar
+                      dataKey="progress"
+                      radius={[6, 6, 0, 0]}
+                      onClick={(data) => navigate(`/projects/${data.id}`)}
+                      className="cursor-pointer"
+                    >
+                      {projectsData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={
+                            entry.progress < 30
+                              ? "#F87171"
+                              : entry.progress < 70
+                              ? "#FBBF24"
+                              : "#34D399"
+                          }
+                        />
+                      ))}
+                      <LabelList
+                        dataKey="progress"
+                        position="top"
+                        fill="#FFFFFF"
+                        formatter={(v) => `${v}%`}
+                      />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-gray-400">
+                  {loading
+                    ? "Loading projects..."
+                    : "No project data available"}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Pie Chart */}
+          <div className="rounded-xl bg-[#111A2E] border border-blue-900/30 p-4">
+            <h2 className="text-lg font-semibold mb-4">
+              Interns by Department
+            </h2>
+            <div className="h-[320px]">
+              {internsData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={internsData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={95}
+                      paddingAngle={2}
+                      activeIndex={activeIndex}
+                      activeShape={renderActiveShape}
+                      onMouseEnter={onPieEnter}
+                      onMouseLeave={() => setActiveIndex(0)}
+                      animationDuration={300}
+                      animationEasing="ease-out"
+                    >
+                      {internsData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                      <LabelList
+                        dataKey="value"
+                        position="outside"
+                        fill="#ffffff"
+                        formatter={(value) => `${value}`}
+                      />
+                    </Pie>
+                    <Tooltip
+                      formatter={(value, name) => [`${value} interns`, name]}
+                      cursor={false}
+                      contentStyle={{
+                        background: "#0F172A",
+                        border: "1px solid #1E3A8A",
+                      }}
+                      labelStyle={{ color: "#E5E7EB" }}
+                      itemStyle={{ color: "#FFFFFF" }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-gray-400">
+                  {loading
+                    ? "Loading interns data..."
+                    : "No interns data available"}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -238,36 +472,123 @@ export default function Dashboard() {
         <div className="mt-8 rounded-xl bg-[#111A2E] border border-blue-900/30 p-4">
           <h2 className="text-lg font-semibold mb-4">Projects Overview</h2>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-gray-300">
-              <thead className="bg-[#1E293B] text-gray-200">
-                <tr>
-                  <th className="px-4 py-2">Name</th>
-                  <th className="px-4 py-2">Description</th>
-                  <th className="px-4 py-2">Deadline</th>
-                  <th className="px-4 py-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {projectsData.map((p) => (
-                  <tr key={p.id} className="border-b border-blue-900/30">
-                    <td className="px-4 py-2">{p.name}</td>
-                    <td className="px-4 py-2">{p.description}</td>
-                    <td className="px-4 py-2">{p.deadline}</td>
-                    <td className="px-4 py-2">
-                      <button onClick={() => handleDeleteProject(p.id)} className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm">Delete</button>
-                    </td>
+            {projectsData.length > 0 ? (
+              <table className="w-full text-left text-gray-300">
+                <thead className="bg-[#1E293B] text-gray-200">
+                  <tr>
+                    <th className="px-4 py-2">Name</th>
+                    <th className="px-4 py-2 hidden sm:table-cell">
+                      Description
+                    </th>
+                    <th className="px-4 py-2">Deadline</th>
+                    <th className="px-4 py-2">Progress</th>
+                    <th className="px-4 py-2">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {projectsData.map((p) => (
+                    <tr
+                      key={p.id}
+                      className="border-b border-blue-900/30 hover:bg-[#1E293B]/50"
+                    >
+                      <td className="px-4 py-2">{p.name}</td>
+                      <td className="px-4 py-2 hidden sm:table-cell">
+                        <div className="truncate max-w-xs">{p.description}</div>
+                      </td>
+                      <td className="px-4 py-2">
+                        {new Date(p.deadline).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-2">
+                        <ProgressButton
+                          projectId={p.id}
+                          currentProgress={p.progress}
+                          onUpdate={handleUpdateProgress}
+                        />
+                      </td>
+                      <td className="px-4 py-2 space-x-2">
+                        <button
+                          onClick={() => navigate(`/projects/${p.id}`)}
+                          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProject(p.id)}
+                          className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="py-4 text-center text-gray-400">
+                {loading ? "Loading projects..." : "No projects found"}
+              </div>
+            )}
           </div>
 
           {/* Add Project */}
-          <div className="mt-4 flex flex-col sm:flex-row gap-3">
-            <input type="text" placeholder="Project Name" value={newProject.name} onChange={(e) => setNewProject({ ...newProject, name: e.target.value })} className="flex-1 rounded bg-[#0F172A] border border-blue-900/30 px-3 py-2" />
-            <input type="text" placeholder="Description" value={newProject.description} onChange={(e) => setNewProject({ ...newProject, description: e.target.value })} className="flex-1 rounded bg-[#0F172A] border border-blue-900/30 px-3 py-2" />
-            <input type="date" value={newProject.deadline} onChange={(e) => setNewProject({ ...newProject, deadline: e.target.value })} className="rounded bg-[#0F172A] border border-blue-900/30 px-3 py-2" />
-            <button onClick={handleAddProject} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-semibold">Add</button>
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="col-span-1 sm:col-span-2">
+              <input
+                type="text"
+                placeholder="Project Name"
+                value={newProject.name}
+                onChange={(e) =>
+                  setNewProject({ ...newProject, name: e.target.value })
+                }
+                className="w-full rounded bg-[#0F172A] border border-blue-900/30 px-3 py-2"
+              />
+            </div>
+            <div className="col-span-1 sm:col-span-2 lg:col-span-1">
+              <input
+                type="text"
+                placeholder="Description"
+                value={newProject.description}
+                onChange={(e) =>
+                  setNewProject({ ...newProject, description: e.target.value })
+                }
+                className="w-full rounded bg-[#0F172A] border border-blue-900/30 px-3 py-2"
+              />
+            </div>
+            <div className="col-span-1">
+              <input
+                type="date"
+                value={newProject.deadline}
+                onChange={(e) =>
+                  setNewProject({ ...newProject, deadline: e.target.value })
+                }
+                className="w-full rounded bg-[#0F172A] border border-blue-900/30 px-3 py-2"
+              />
+            </div>
+            <div className="col-span-1 flex items-center space-x-2">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={newProject.progress}
+                onChange={(e) =>
+                  setNewProject({
+                    ...newProject,
+                    progress: parseInt(e.target.value),
+                  })
+                }
+                className="flex-1"
+              />
+              <span className="w-12 text-center">{newProject.progress}%</span>
+            </div>
+            <div className="col-span-1 sm:col-span-2 lg:col-span-1">
+              <button
+                onClick={handleAddProject}
+                className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-semibold"
+                disabled={loading}
+              >
+                {loading ? "Adding..." : "Add Project"}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -275,16 +596,24 @@ export default function Dashboard() {
         <div className="mt-10 rounded-xl bg-[#111A2E] border border-blue-900/30 p-6">
           <h2 className="text-lg font-semibold mb-4">Company Achievements</h2>
           <ul className="list-disc pl-6 space-y-2 text-gray-300">
-            <li>Reached 100+ successful projects</li>
-            <li>50+ interns hired full-time</li>
-            <li>Expanded operations across multiple industries</li>
+            <li>
+              Managed {loading ? "..." : stats.interns} interns across{" "}
+              {loading ? "..." : internsData.length} departments
+            </li>
+            <li>
+              Completed {loading ? "..." : stats.projects} projects successfully
+            </li>
+            <li>
+              Maintained {loading ? "..." : stats.status.toLowerCase()}{" "}
+              internship program
+            </li>
           </ul>
           <button
-      onClick={() => navigate("/achievements")}
-      className="mt-4 px-4 py-2 bg-green-600 hover:bg-green-700 rounded font-semibold"
-    >
-      See More Achievements
-    </button>
+            onClick={() => navigate("/achievements")}
+            className="mt-4 px-4 py-2 bg-green-600 hover:bg-green-700 rounded font-semibold"
+          >
+            See More Achievements
+          </button>
         </div>
       </main>
       <Footer />
