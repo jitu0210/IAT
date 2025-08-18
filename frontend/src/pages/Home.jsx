@@ -326,14 +326,14 @@ export default function Dashboard() {
           <div className="rounded-xl bg-[#111A2E] border border-blue-900/30 p-4">
             <div className="text-sm text-gray-400">Start Date</div>
             <div className="mt-1 text-2xl font-bold text-amber-400">
-              {loading ? "..." : stats.startDate}
+              11 August
             </div>
           </div>
 
           <div className="rounded-xl bg-[#111A2E] border border-blue-900/30 p-4">
             <div className="text-sm text-gray-400">Status</div>
             <div className="mt-1 text-2xl font-bold text-indigo-300">
-              {loading ? "..." : stats.status}
+              In progress...
             </div>
           </div>
         </div>
@@ -410,7 +410,7 @@ export default function Dashboard() {
           {/* Pie Chart */}
           <div className="rounded-xl bg-[#111A2E] border border-blue-900/30 p-4">
             <h2 className="text-lg font-semibold mb-4">
-              Interns by Department
+              Interns by Branch
             </h2>
             <div className="h-[320px]">
               {internsData.length > 0 ? (

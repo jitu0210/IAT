@@ -11,7 +11,7 @@ export default function Projects() {
   // Fetch projects from backend
   const fetchProjects = async () => {
     try {
-      const response = await axios.get("https://your-backend-api.com/projects");
+      const response = await axios.get("http://localhost:8000/api/v1/projects");
       setProjects(response.data);
     } catch (err) {
       console.error(err);
@@ -30,7 +30,7 @@ export default function Projects() {
       <Header />
 
       {/* Hero Section */}
-      <section className="py-20 text-center">
+      <section className="py-5 text-center">
         <h1 className="text-4xl md:text-5xl font-bold text-blue-400 mb-6">
           Our Projects
         </h1>

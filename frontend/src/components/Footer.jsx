@@ -57,7 +57,7 @@ export default function Footer() {
                   href="mailto:hr@aartech.com"
                   className="text-blue-400 hover:underline"
                 >
-                  hr@aartech.com
+                  dummy@mail.com
                 </a>
               </li>
               <li>
@@ -66,7 +66,7 @@ export default function Footer() {
                   href="tel:+919876543210"
                   className="text-blue-400 hover:underline"
                 >
-                  +91 98765 43210
+                  +91 98XXX XXXXX
                 </a>
               </li>
               <li>Address: Mandideep,Madhya Pradesh, India</li>
