@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema(
     branch: {
       type: String,
       enum: ["MBA", "Electrical", "Electronics", "CSE", "Mechanical"],
-      required: true,
+      required: false,
     },
     refreshtoken: {
       type: String,

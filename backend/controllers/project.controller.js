@@ -3,23 +3,34 @@ import Project from "../models/project.model.js";
 // ---------------- Create Project ---------------- //
 export const addProject = async (req, res) => {
   try {
-    const { name, description, deadline, progress = 0 } = req.body;
+    const { name, description, deadline, progress, links } = req.body;
 
-    if (!name || !deadline)
+    // Basic validation
+    if (!name || !deadline) {
       return res.status(400).json({ error: "Name and deadline are required" });
+    }
+
+    // Filter out any empty links
+    const filteredLinks = links ? links.filter(link => link.title && link.url) : [];
 
     const project = await Project.create({ 
       name, 
       description, 
-      deadline,
-      progress 
+      deadline: new Date(deadline),
+      progress: progress || 0,
+      links: filteredLinks
     });
+
     return res.status(201).json(project);
   } catch (err) {
     console.error("Add project error:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ 
+      error: err.message || "Internal server error",
+      details: err.errors 
+    });
   }
 };
+
 
 // ---------------- Get All Projects ---------------- //
 export const getAllProjects = async (req, res) => {

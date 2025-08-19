@@ -19,6 +19,23 @@ const projectSchema = new mongoose.Schema({
     min: 0,
     max: 100,
   },
+  links: [{
+    title: {
+      type: String,
+      required: false
+    },
+    url: {
+      type: String,
+      required: false,
+      validate: {
+        validator: function(v) {
+          // Simple URL validation - can be enhanced
+          return /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(v);
+        },
+        message: props => `${props.value} is not a valid URL!`
+      }
+    }
+  }],
   createdAt: {
     type: Date,
     default: Date.now,

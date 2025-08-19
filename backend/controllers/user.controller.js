@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import bcrypt from 'bcrypt';
 
 dotenv.config();
 
@@ -62,39 +63,38 @@ const registerUser = async (req, res) => {
 
 // ---------------- Login User ---------------- //
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
-
   try {
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and Password required" });
+    const { email, password } = req.body;
+    
+    // Find user by email without validating the full document
+    const user = await User.findOne({ email }).select('+password');
+    
+    if (!user) {
+      return res.status(401).json({ error: "Invalid credentials" });
     }
-
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    const isPasswordValid = await user.matchPassword(password);
-    if (!isPasswordValid)
-      return res.status(400).json({ error: "Invalid Password" });
-
-    const accessToken = generateAccessToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
-
-    user.refreshtoken = refreshToken;
-    await user.save();
-
-    return res.status(200).json({
-      message: "Login successful",
-      user: {
-        username: user.username,
-        email: user.email,
-        branch: user.branch, // <-- fixed
-      },
-      accessToken,
-      refreshToken,
+    
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+    
+    // Generate token without saving the user (to avoid validation)
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '1d'
     });
-  } catch (error) {
-    console.error("Login error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    
+    // Return user data without the branch if it's not available
+    const userData = user.toObject();
+    delete userData.password;
+    
+    res.status(200).json({ 
+      token,
+      user: userData
+    });
+    
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Login failed. Please try again." });
   }
 };
 
@@ -154,6 +154,28 @@ const getDepartmentCounts = async (req, res) => {
   } catch (error) {
     console.error("Error fetching department counts:", error);
     return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Verify Token
+export const verifyToken = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    return res.status(200).json({ valid: true, user });
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid token" });
   }
 };
 

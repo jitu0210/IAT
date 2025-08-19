@@ -19,20 +19,18 @@ export default function Login() {
     try {
       const response = await axios.post(
         "http://localhost:8000/api/v1/user/login",
-        { email, password },
-        { withCredentials: true } // allow cookies (important if using cookies auth)
+        { email, password }
       );
 
-      // ✅ Save token to localStorage
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-
-      console.log("Login Success:", response.data);
-
-      // ✅ Redirect user after login
-      navigate("/");
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        navigate("/");
+      } else {
+        throw new Error("No token received");
+      }
     } catch (err) {
-      setError(err.response?.data?.error || "Login failed");
+      setError(err.response?.data?.error || "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
