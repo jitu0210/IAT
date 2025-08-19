@@ -32,21 +32,22 @@ const ProgressButton = ({ projectId, currentProgress, onUpdate }) => {
 
   const handleSave = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/projects/${projectId}/progress`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ progress }),
-      });
+      const token = localStorage.getItem("token");
+      const response = await axios.patch(
+        `http://localhost:8000/api/v1/projects/${projectId}/progress`,
+        { progress },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          }
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error('Failed to update progress');
+      if (response.data) {
+        onUpdate(projectId, response.data.progress);
+        setIsOpen(false);
       }
-
-      const updatedProject = await response.json();
-      onUpdate(projectId, updatedProject.progress);
-      setIsOpen(false);
     } catch (err) {
       console.error("Update failed", err);
       alert("Failed to update progress");
@@ -104,14 +105,12 @@ const ProgressButton = ({ projectId, currentProgress, onUpdate }) => {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-
   const [stats, setStats] = useState({
     interns: 0,
     projects: 0,
     startDate: "Loading...",
     status: "Loading...",
   });
-
   const [internsData, setInternsData] = useState([]);
   const [projectsData, setProjectsData] = useState([]);
   const [newProject, setNewProject] = useState({
@@ -126,95 +125,111 @@ export default function Dashboard() {
 
   const onPieEnter = useCallback((_, index) => setActiveIndex(index), []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        // Fetch interns by department
-        const internsRes = await axios.get(
-          "http://localhost:8000/api/v1/user/department-counts"
+      const token = localStorage.getItem("token");
+      
+      // Fetch interns by department
+      const internsRes = await axios.get(
+        "http://localhost:8000/api/v1/user/department-counts",
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      
+      if (internsRes.data && internsRes.data.length) {
+        const transformedInternsData = internsRes.data.map((item) => ({
+          name: item.department,
+          value: item.count,
+        }));
+        setInternsData(transformedInternsData);
+
+        const totalInterns = transformedInternsData.reduce(
+          (sum, item) => sum + item.value,
+          0
         );
-        if (internsRes.data && internsRes.data.length) {
-          const transformedInternsData = internsRes.data.map((item) => ({
-            name: item.department,
-            value: item.count,
-          }));
-          setInternsData(transformedInternsData);
-
-          // Calculate total interns for stats
-          const totalInterns = transformedInternsData.reduce(
-            (sum, item) => sum + item.value,
-            0
-          );
-          setStats((prev) => ({ ...prev, interns: totalInterns }));
-        } else {
-          setInternsData([]);
-        }
-
-        // Fetch projects
-        const projectsRes = await axios.get(
-          "http://localhost:8000/api/v1/projects"
-        );
-        if (projectsRes.data && projectsRes.data.length) {
-          setProjectsData(projectsRes.data);
-          setStats((prev) => ({ ...prev, projects: projectsRes.data.length }));
-        } else {
-          setProjectsData([]);
-        }
-
-        // Fetch additional stats
-        const statsRes = await axios.get("");
-        if (statsRes.data) {
-          setStats((prev) => ({ ...prev, ...statsRes.data }));
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Failed to load dashboard data. Please try again later.");
+        setStats((prev) => ({ ...prev, interns: totalInterns }));
+      } else {
         setInternsData([]);
-        setProjectsData([]);
-      } finally {
-        setLoading(false);
       }
-    };
 
-    fetchData();
+      // Fetch projects
+      const projectsRes = await axios.get(
+        "http://localhost:8000/api/v1/projects",
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      
+      if (projectsRes.data && projectsRes.data.length) {
+        setProjectsData(projectsRes.data);
+        setStats((prev) => ({ ...prev, projects: projectsRes.data.length }));
+      } else {
+        setProjectsData([]);
+      }
 
-    // Set up refresh interval (every 30 seconds)
-    const intervalId = setInterval(fetchData, 30000);
-    return () => clearInterval(intervalId);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError("Failed to load dashboard data. Please try again later.");
+      setInternsData([]);
+      setProjectsData([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    fetchData();
+    const intervalId = setInterval(fetchData, 30000);
+    return () => clearInterval(intervalId);
+  }, [fetchData]);
+
   const handleDeleteProject = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this project?")) return;
+    
     try {
-      await axios.delete(`http://localhost:8000/api/v1/projects/${id}`);
-      setProjectsData((prev) => prev.filter((p) => p.id !== id));
+      const token = localStorage.getItem("token");
+      await axios.delete(
+        `http://localhost:8000/api/v1/projects/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      setProjectsData((prev) => prev.filter((p) => p._id !== id));
       setStats((prev) => ({ ...prev, projects: prev.projects - 1 }));
     } catch (err) {
       console.error("Delete failed", err);
+      alert("Failed to delete project");
     }
   };
 
   const handleAddProject = async () => {
-    if (!newProject.name || !newProject.deadline) return;
+    if (!newProject.name || !newProject.deadline) {
+      alert("Project name and deadline are required");
+      return;
+    }
+    
     try {
-      const response = await fetch("http://localhost:8000/api/v1/projects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newProject), 
-      });
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        "http://localhost:8000/api/v1/projects",
+        newProject,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          }
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error("Failed to add project");
+      if (response.data) {
+        setProjectsData((prev) => [...prev, response.data]);
+        setStats((prev) => ({ ...prev, projects: prev.projects + 1 }));
+        setNewProject({ name: "", description: "", deadline: "", progress: 0 });
       }
-
-      const added = await response.json();
-      setProjectsData((prev) => [...prev, added]);
-      setStats((prev) => ({ ...prev, projects: prev.projects + 1 }));
-      setNewProject({ name: "", description: "", deadline: "", progress: 0 });
     } catch (err) {
       console.error("Add failed", err);
       alert("Failed to add project");
@@ -224,7 +239,7 @@ export default function Dashboard() {
   const handleUpdateProgress = (projectId, newProgress) => {
     setProjectsData((prev) =>
       prev.map((project) =>
-        project.id === projectId
+        project._id === projectId
           ? { ...project, progress: newProgress }
           : project
       )
@@ -280,7 +295,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-[#0B1220] text-white flex flex-col">
       <Header />
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-        {/* Top Section */}
+        {/* Top Section - Responsive layout */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
           <button
@@ -291,8 +306,8 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* Stats */}
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        {/* Stats - Responsive grid */}
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           <button
             onClick={() => navigate("/projects")}
             className="group rounded-xl bg-[#111A2E] border border-blue-900/30 p-4 text-left hover:border-blue-500/40 transition"
@@ -330,7 +345,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="rounded-xl bg-[#111A2E] border border-blue-900/30 p-4">
+          <div className="rounded-xl bg-[#111A2E] border border-blue-900/30 p-4 hidden xl:block">
             <div className="text-sm text-gray-400">Status</div>
             <div className="mt-1 text-2xl font-bold text-indigo-300">
               In progress...
@@ -338,15 +353,19 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Charts */}
+        {/* Charts - Responsive layout */}
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Bar Chart */}
           <div className="rounded-xl bg-[#111A2E] border border-blue-900/30 p-4">
             <h2 className="text-lg font-semibold mb-4">Projects Progress</h2>
-            <div className="h-[320px]">
+            <div className="h-[320px] min-w-0"> {/* Added min-w-0 for chart responsiveness */}
               {projectsData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={projectsData} barSize={38}>
+                  <BarChart 
+                    data={projectsData} 
+                    barSize={38}
+                    margin={{ top: 20, right: 20, left: 0, bottom: 60 }}
+                  >
                     <XAxis
                       dataKey="name"
                       tick={{ fill: "#9CA3AF", fontSize: 12 }}
@@ -373,7 +392,7 @@ export default function Dashboard() {
                     <Bar
                       dataKey="progress"
                       radius={[6, 6, 0, 0]}
-                      onClick={(data) => navigate(`/projects/${data.id}`)}
+                      onClick={(data) => navigate(`/projects/${data._id}`)}
                       className="cursor-pointer"
                     >
                       {projectsData.map((entry, index) => (
@@ -409,10 +428,8 @@ export default function Dashboard() {
 
           {/* Pie Chart */}
           <div className="rounded-xl bg-[#111A2E] border border-blue-900/30 p-4">
-            <h2 className="text-lg font-semibold mb-4">
-              Interns by Branch
-            </h2>
-            <div className="h-[320px]">
+            <h2 className="text-lg font-semibold mb-4">Interns by Branch</h2>
+            <div className="h-[320px] min-w-0">
               {internsData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -468,12 +485,12 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Projects Table */}
+        {/* Projects Table - Responsive with horizontal scroll on small screens */}
         <div className="mt-8 rounded-xl bg-[#111A2E] border border-blue-900/30 p-4">
           <h2 className="text-lg font-semibold mb-4">Projects Overview</h2>
           <div className="overflow-x-auto">
             {projectsData.length > 0 ? (
-              <table className="w-full text-left text-gray-300">
+              <table className="w-full text-left text-gray-300 min-w-[600px]"> {/* Added min-width */}
                 <thead className="bg-[#1E293B] text-gray-200">
                   <tr>
                     <th className="px-4 py-2">Name</th>
@@ -488,7 +505,7 @@ export default function Dashboard() {
                 <tbody>
                   {projectsData.map((p) => (
                     <tr
-                      key={p.id}
+                      key={p._id}
                       className="border-b border-blue-900/30 hover:bg-[#1E293B]/50"
                     >
                       <td className="px-4 py-2">{p.name}</td>
@@ -500,20 +517,20 @@ export default function Dashboard() {
                       </td>
                       <td className="px-4 py-2">
                         <ProgressButton
-                          projectId={p.id}
+                          projectId={p._id}
                           currentProgress={p.progress}
                           onUpdate={handleUpdateProgress}
                         />
                       </td>
-                      <td className="px-4 py-2 space-x-2">
+                      <td className="px-4 py-2 space-x-2 whitespace-nowrap">
                         <button
-                          onClick={() => navigate(`/projects`)}
+                          onClick={() => navigate(`/projects/${p._id}`)}
                           className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
                         >
                           View
                         </button>
                         <button
-                          onClick={() => handleDeleteProject(p.id)}
+                          onClick={() => handleDeleteProject(p._id)}
                           className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
                         >
                           Delete
@@ -530,7 +547,7 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Add Project */}
+          {/* Add Project - Responsive grid */}
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="col-span-1 sm:col-span-2">
               <input
@@ -541,6 +558,7 @@ export default function Dashboard() {
                   setNewProject({ ...newProject, name: e.target.value })
                 }
                 className="w-full rounded bg-[#0F172A] border border-blue-900/30 px-3 py-2"
+                required
               />
             </div>
             <div className="col-span-1 sm:col-span-2 lg:col-span-1">
@@ -562,6 +580,7 @@ export default function Dashboard() {
                   setNewProject({ ...newProject, deadline: e.target.value })
                 }
                 className="w-full rounded bg-[#0F172A] border border-blue-900/30 px-3 py-2"
+                required
               />
             </div>
             <div className="col-span-1 flex items-center space-x-2">
