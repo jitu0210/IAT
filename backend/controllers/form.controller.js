@@ -1,18 +1,19 @@
 import Form from "../models/form.model.js";
 
-// Submit a new form (public)
+// Submit a new form (protected)
 export const submitForm = async (req, res) => {
   try {
     const { name, branch, activities, date } = req.body;
+    const userId = req.user._id; // Get userId from authenticated user
 
     if (!name || !branch || !activities || !date) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Check if a submission exists within the last 12 hours for the same name
+    // Check if a submission exists within the last 12 hours for the same user
     const last12Hours = new Date(Date.now() - 12 * 60 * 60 * 1000);
     const existing = await Form.findOne({
-      name,
+      userId,
       date: { $gte: last12Hours },
     });
 
@@ -22,7 +23,7 @@ export const submitForm = async (req, res) => {
         .json({ message: "You can submit only once every 12 hours" });
     }
 
-    const form = await Form.create({ name, branch, activities, date });
+    const form = await Form.create({ userId, name, branch, activities, date });
     res.status(201).json(form);
   } catch (err) {
     console.error("SubmitForm Error:", err);
@@ -30,7 +31,7 @@ export const submitForm = async (req, res) => {
   }
 };
 
-// Get all submissions (public)
+// Get all submissions (protected)
 export const getAllForms = async (req, res) => {
   try {
     const forms = await Form.find().sort({ date: -1 });
@@ -41,7 +42,7 @@ export const getAllForms = async (req, res) => {
   }
 };
 
-// Get submissions in the last 12 hours (public)
+// Get submissions in the last 12 hours (protected)
 export const getDailyForms = async (req, res) => {
   try {
     const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
@@ -51,6 +52,26 @@ export const getDailyForms = async (req, res) => {
     res.status(200).json(forms);
   } catch (err) {
     console.error("GetRecentForms Error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get user submission history (protected)
+export const getUserHistory = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Verify the requesting user can only access their own history
+    if (req.user._id.toString() !== userId && !req.user.isAdmin) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    const userHistory = await Form.find({ userId })
+      .sort({ date: -1 });
+      
+    res.status(200).json(userHistory);
+  } catch (err) {
+    console.error("GetUserHistory Error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };

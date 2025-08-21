@@ -82,7 +82,7 @@ export default function Header() {
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
               {user && (
-                <span className="text-white">Welcome, {user.name}</span>
+                <span className="hover:text-white text-yellow-500">Welcome, {user.username}</span>
               )}
               <button
                 onClick={handleLogout}
@@ -113,7 +113,7 @@ export default function Header() {
       {/* Mobile Dropdown */}
       {isMenuOpen && (
         <nav className="md:hidden bg-black border-t border-blue-800">
-          <ul className="flex flex-col gap-4 px-6 py-4 text-lg">
+          <ul className="flex flex-col gap-4 px-6 py-2 text-lg">
             <li><Link to="/developers" onClick={() => setIsMenuOpen(false)}>Developers</Link></li>
             <li><Link to="/about" onClick={() => setIsMenuOpen(false)}>About</Link></li>
             <li><Link to="/contact" onClick={() => setIsMenuOpen(false)}>Contact</Link></li>
@@ -121,7 +121,7 @@ export default function Header() {
               {isAuthenticated ? (
                 <div className="flex flex-col gap-4">
                   {user && (
-                    <span className="text-white text-center">Welcome, {user.name}</span>
+                    <span className="hover:text-white text-yellow-500 text-center">Welcome {user.username}</span>
                   )}
                   <button
                     onClick={() => { handleLogout(); setIsMenuOpen(false); }}

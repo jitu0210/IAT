@@ -1,10 +1,19 @@
+// routes/form.routes.js
 import express from "express";
-import { submitForm, getAllForms, getDailyForms } from "../controllers/form.controller.js";
+import { 
+  submitForm, 
+  getAllForms, 
+  getDailyForms, 
+  getUserHistory 
+} from "../controllers/form.controller.js";
+import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/submit-form", submitForm);
-router.get("/all-intern", getAllForms); // public
-router.get("/daily-intern", getDailyForms); // protected
+// All form routes are protected
+router.post("/submit-form", protect, submitForm);
+router.get("/all-forms", protect, getAllForms);
+router.get("/daily-forms", protect, getDailyForms);
+router.get("/user-history/:userId", protect, getUserHistory);
 
 export default router;

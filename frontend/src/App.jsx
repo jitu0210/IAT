@@ -10,6 +10,8 @@ import Achievements from "./pages/Acheivements.jsx";
 import Groups from "./pages/Groups.jsx";
 import Interns from "./pages/Interns.jsx";
 import Projects from "./pages/Projects.jsx";
+import Activity from "./pages/Activity.jsx"
+import ProjectDetail from "./pages/ProjectDetail.jsx";
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
         <Route path="/groups" element={<Groups />} />
         <Route path="/interns" element={<Interns />} />
         <Route path="/projects" element={<Projects />} />
+        <Route path="/projects/projectId" element={<ProjectDetail />} />
+        <Route path="/activity" element={<Activity />} />
       </Routes>
     </BrowserRouter>
   );

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { useNavigate } from "react-router-dom"; 
 
 export default function Projects() {
   const [projects, setProjects] = useState([]);
@@ -11,10 +12,12 @@ export default function Projects() {
     name: "",
     description: "",
     progress: 0,
+    deadline: "",
     links: [{ title: "", url: "" }]
   });
   const [showAddForm, setShowAddForm] = useState(false);
   const [formErrors, setFormErrors] = useState({});
+  const navigate = useNavigate(); 
 
   // Fetch projects from backend
   const fetchProjects = async () => {
@@ -62,6 +65,7 @@ export default function Projects() {
     if (!newProject.name.trim()) errors.name = "Project name is required";
     if (!newProject.description.trim()) errors.description = "Description is required";
     if (newProject.progress < 0 || newProject.progress > 100) errors.progress = "Invalid progress value";
+    if (!newProject.deadline) errors.deadline = "Deadline is required";
     
     // Validate links
     newProject.links.forEach((link, index) => {
@@ -92,51 +96,70 @@ export default function Projects() {
 
   // Submit new project
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  if (!validateForm()) return;
-
-  try {
-    setLoading(true);
+    e.preventDefault();
     
-    // Prepare the project data for submission
-    const projectToSubmit = {
-      name: newProject.name,
-      description: newProject.description,
-      progress: Number(newProject.progress),
-      deadline: new Date(newProject.deadline).toISOString(), // Convert to ISO string
-      links: newProject.links
-        .filter(link => link.title && link.url) // Remove empty links
-        .map(link => ({
-          title: link.title,
-          url: link.url.startsWith('http') ? link.url : `https://${link.url}` // Ensure URL has protocol
-        }))
-    };
+    if (!validateForm()) return;
 
-    const response = await axios.post(
-      "http://localhost:8000/api/v1/projects",
-      projectToSubmit,
-      {
-        headers: {
-          'Content-Type': 'application/json'
+    try {
+      setLoading(true);
+      
+      // Prepare the project data for submission
+      const projectToSubmit = {
+        name: newProject.name,
+        description: newProject.description,
+        progress: Number(newProject.progress),
+        deadline: new Date(newProject.deadline).toISOString(), // Convert to ISO string
+        links: newProject.links
+          .filter(link => link.title && link.url) // Remove empty links
+          .map(link => ({
+            title: link.title,
+            url: link.url.startsWith('http') ? link.url : `https://${link.url}` // Ensure URL has protocol
+          }))
+      };
+
+      const response = await axios.post(
+        "http://localhost:8000/api/v1/projects/",
+        projectToSubmit,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }
-      }
-    );
+      );
 
-    if (response.status === 201) {
-      fetchProjects(); // Refresh the projects list
-      resetForm();
+      if (response.status === 201) {
+        fetchProjects(); // Refresh the projects list
+        resetForm();
+        setError(""); // Clear any previous errors
+      }
+    } catch (err) {
+      console.error("Save error:", err);
+      // Display more detailed error message
+      setError(err.response?.data?.error || 
+              err.response?.data?.message || 
+              "Failed to save project. Please check your inputs.");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("Save error:", err);
-    // Display more detailed error message
-    setError(err.response?.data?.error || 
-             err.response?.data?.message || 
-             "Failed to save project. Please check your inputs.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
+  // Delete project
+  const handleDeleteProject = async (projectId) => {
+    if (window.confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
+      try {
+        setLoading(true);
+        await axios.delete(`http://localhost:8000/api/v1/projects/${projectId}`);
+        // Refresh the projects list after deletion
+        fetchProjects();
+        setError(""); // Clear any previous errors
+      } catch (err) {
+        console.error("Delete error:", err);
+        setError("Failed to delete project");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
 
   // Reset form
   const resetForm = () => {
@@ -144,10 +167,16 @@ export default function Projects() {
       name: "",
       description: "",
       progress: 0,
+      deadline: "",
       links: [{ title: "", url: "" }]
     });
     setFormErrors({});
     setShowAddForm(false);
+  };
+
+  // Function to navigate to project detail page
+  const handleViewProjectDetails = (projectId) => {
+    navigate(`/projects/${projectId}`);
   };
 
   useEffect(() => {
@@ -159,7 +188,7 @@ export default function Projects() {
       <Header />
 
       {/* Hero Section */}
-      <section className="py-12 text-center bg-gradient-to-b from-blue-900/20 to-black">
+      <section className="py-6 text-center bg-gradient-to-b from-blue-900/20 to-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <h1 className="text-3xl md:text-5xl font-bold text-blue-400 mb-4 md:mb-6">
             Our Projects
@@ -175,6 +204,15 @@ export default function Projects() {
           </button>
         </div>
       </section>
+
+      {/* Error Message */}
+      {error && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-4">
+          <div className="bg-red-900/30 border border-red-700 text-red-400 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        </div>
+      )}
 
       {/* Add Project Form */}
       {showAddForm && (
@@ -226,6 +264,20 @@ export default function Projects() {
                     className={`w-full ${formErrors.progress ? "border-red-500" : ""}`}
                   />
                   {formErrors.progress && <p className="text-red-500 text-sm mt-1">{formErrors.progress}</p>}
+                </div>
+
+                {/* Deadline */}
+                <div>
+                  <label className="block text-gray-300 mb-2">Deadline*</label>
+                  <input
+                    type="date"
+                    name="deadline"
+                    value={newProject.deadline}
+                    onChange={handleInputChange}
+                    className={`w-full bg-gray-800 border ${formErrors.deadline ? "border-red-500" : "border-gray-700"} rounded-lg px-4 py-2 text-white focus:border-blue-400 focus:outline-none`}
+                    required
+                  />
+                  {formErrors.deadline && <p className="text-red-500 text-sm mt-1">{formErrors.deadline}</p>}
                 </div>
 
                 {/* Project Links */}
@@ -303,10 +355,6 @@ export default function Projects() {
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-400 mb-4"></div>
               <p className="text-gray-400">Loading projects...</p>
             </div>
-          ) : error ? (
-            <div className="text-center py-12">
-              <p className="text-red-500 bg-red-900/30 inline-block px-4 py-2 rounded-lg">{error}</p>
-            </div>
           ) : projects.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-400">No projects found.</p>
@@ -318,7 +366,12 @@ export default function Projects() {
                   key={project._id}
                   className="bg-gray-900 rounded-xl p-5 shadow-lg border border-gray-800 hover:border-blue-400/30 transition-all hover:shadow-blue-500/20"
                 >
-                  <h3 className="text-xl font-bold text-blue-400 mb-3">{project.name}</h3>
+                  <h3 
+                    className="text-xl font-bold text-blue-400 mb-3 cursor-pointer hover:text-blue-300"
+                    onClick={() => handleViewProjectDetails(project._id)}
+                  >
+                    {project.name}
+                  </h3>
                   <p className="text-gray-300 mb-5 text-sm">{project.description}</p>
 
                   {/* Progress bar */}
@@ -340,6 +393,13 @@ export default function Projects() {
                       ></div>
                     </div>
                   </div>
+
+                  {/* Deadline */}
+                  {project.deadline && (
+                    <div className="mb-4">
+                      <p className="text-gray-400 text-sm">Deadline: {new Date(project.deadline).toLocaleDateString()}</p>
+                    </div>
+                  )}
 
                   {/* Project Links */}
                   {project.links && project.links.length > 0 && (
@@ -375,6 +435,25 @@ export default function Projects() {
                       </ul>
                     </div>
                   )}
+                  
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 mt-4">
+                    <button
+                      onClick={() => handleViewProjectDetails(project._id)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition flex-1"
+                    >
+                      View Details
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProject(project._id)}
+                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition"
+                      title="Delete Project"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
