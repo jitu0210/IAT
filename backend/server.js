@@ -5,6 +5,7 @@ import cors from "cors";
 import userRoutes from "./routes/user.routes.js";
 import formRoutes from "./routes/form.routes.js";
 import projectRoutes from "./routes/project.routes.js";
+import ratingRoutes from "./routes/rating.routes.js"
 import connectDB from "./config/db.js";
 
 dotenv.config();
@@ -24,6 +25,7 @@ connectDB()
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/form", formRoutes);
 app.use("/api/v1/projects",projectRoutes)
+app.use("/api/v1/rating",ratingRoutes)
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

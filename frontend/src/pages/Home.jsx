@@ -524,7 +524,7 @@ export default function Dashboard() {
                       </td>
                       <td className="px-4 py-2 space-x-2 whitespace-nowrap">
                         <button
-                          onClick={() => navigate(`/projects/${p._id}`)}
+                          onClick={() => navigate(`/projects`)}
                           className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
                         >
                           View
