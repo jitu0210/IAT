@@ -108,6 +108,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState({
     interns: 0,
     projects: 0,
+    groups: 0,
     startDate: "Loading...",
     status: "Loading...",
   });
@@ -151,7 +152,7 @@ export default function Dashboard() {
           (sum, item) => sum + item.value,
           0
         );
-        setStats((prev) => ({ ...prev, interns: totalInterns }));
+        setStats((prev) => ({ ...prev, interns: totalInterns, groups: Math.ceil(totalInterns / 5) }));
       } else {
         setInternsData([]);
       }
@@ -333,17 +334,20 @@ export default function Dashboard() {
             className="group rounded-xl bg-[#111A2E] border border-blue-900/30 p-4 text-left hover:border-blue-500/40 transition"
           >
             <div className="text-lg font-bold text-white">Groups</div>
-            <div className="mt-1 text-3xl font-bold text-blue-400">
-              {loading ? "..." : Math.ceil(stats.interns / 5)}
+            <div className="mt-1 text-3xl font-bold text-blue-400 group-hover:text-blue-300">
+              {loading ? "..." : stats.groups}
             </div>
           </button>
 
-          <div className="rounded-xl bg-[#111A2E] border border-blue-900/30 p-4">
-            <div className="text-sm text-gray-400">Start Date</div>
-            <div className="mt-1 text-2xl font-bold text-amber-400">
-              11 August
+          <button
+            onClick={() => navigate("/intern-activity")}
+            className="group rounded-xl bg-[#111A2E] border border-blue-900/30 p-4 text-left hover:border-blue-500/40 transition"
+          >
+            <div className="text-lg font-bold text-white">Intern Activity</div>
+            <div className="mt-1 text-2xl font-bold text-amber-400 group-hover:text-amber-300">
+              View
             </div>
-          </div>
+          </button>
 
           <div className="rounded-xl bg-[#111A2E] border border-blue-900/30 p-4 hidden xl:block">
             <div className="text-sm text-gray-400">Status</div>
@@ -482,6 +486,20 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
+            {/* Legend for Pie Chart */}
+            {internsData.length > 0 && (
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                {internsData.map((entry, index) => (
+                  <div key={index} className="flex items-center">
+                    <div 
+                      className="w-3 h-3 mr-1" 
+                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                    ></div>
+                    <span className="text-xs text-gray-300">{entry.name}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -623,8 +641,7 @@ export default function Dashboard() {
               Completed {loading ? "..." : stats.projects} projects successfully
             </li>
             <li>
-              Maintained {loading ? "..." : stats.status.toLowerCase()}{" "}
-              internship program
+              Organized interns into {loading ? "..." : stats.groups} working groups
             </li>
           </ul>
           <button

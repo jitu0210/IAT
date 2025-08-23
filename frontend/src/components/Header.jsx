@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import logo from "../assets/aartech.png"; // Import your logo
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -65,12 +64,11 @@ export default function Header() {
   return (
     <header className="bg-black text-blue-400 shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link to="/" className="hover:text-white transition">
-          <img 
-            src={logo} 
-            alt="Aartech Solonics Ltd" 
-            className="h-12" // Adjust height as needed
-          />
+        <Link 
+          to="/" 
+          className="hover:text-white transition text-2xl font-bold"
+        >
+          Aartech Solonics Limited
         </Link>
 
         {/* Desktop Nav */}
@@ -82,7 +80,7 @@ export default function Header() {
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
               {user && (
-                <span className="hover:text-white text-yellow-500">Welcome, {user.username}</span>
+                <span className="hover:text-white font-bold text-yellow-400">Welcome, {user.username}</span>
               )}
               <button
                 onClick={handleLogout}
@@ -114,14 +112,14 @@ export default function Header() {
       {isMenuOpen && (
         <nav className="md:hidden bg-black border-t border-blue-800">
           <ul className="flex flex-col gap-4 px-6 py-2 text-lg">
-            <li><Link to="/developers" onClick={() => setIsMenuOpen(false)}>Developers</Link></li>
-            <li><Link to="/about" onClick={() => setIsMenuOpen(false)}>About</Link></li>
-            <li><Link to="/contact" onClick={() => setIsMenuOpen(false)}>Contact</Link></li>
+            <li><Link to="/developers" onClick={() => setIsMenuOpen(false)} className="block py-2">Developers</Link></li>
+            <li><Link to="/about" onClick={() => setIsMenuOpen(false)} className="block py-2">About</Link></li>
+            <li><Link to="/contact" onClick={() => setIsMenuOpen(false)} className="block py-2">Contact</Link></li>
             <li>
               {isAuthenticated ? (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 py-2">
                   {user && (
-                    <span className="hover:text-white text-yellow-500 text-center">Welcome {user.username}</span>
+                    <span className="hover:text-white text-yellow-400 text-center">Welcome {user.username}</span>
                   )}
                   <button
                     onClick={() => { handleLogout(); setIsMenuOpen(false); }}
@@ -133,7 +131,7 @@ export default function Header() {
               ) : (
                 <button
                   onClick={() => { navigate("/login"); setIsMenuOpen(false); }}
-                  className="block bg-green-600 text-white px-4 py-2 rounded-md font-semibold text-center hover:bg-green-700 transition"
+                  className="block bg-green-600 text-white px-4 py-2 rounded-md font-semibold text-center hover:bg-green-700 transition w-full"
                 >
                   Login
                 </button>

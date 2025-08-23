@@ -16,7 +16,6 @@ export default function Projects() {
     links: [{ title: "", url: "" }]
   });
   const [showAddForm, setShowAddForm] = useState(false);
-  const [formErrors, setFormErrors] = useState({});
   const navigate = useNavigate(); 
 
   // Fetch projects from backend
@@ -59,47 +58,10 @@ export default function Projects() {
     setNewProject({ ...newProject, links: updatedLinks });
   };
 
-  // Validate form
-  const validateForm = () => {
-    const errors = {};
-    if (!newProject.name.trim()) errors.name = "Project name is required";
-    if (!newProject.description.trim()) errors.description = "Description is required";
-    if (newProject.progress < 0 || newProject.progress > 100) errors.progress = "Invalid progress value";
-    if (!newProject.deadline) errors.deadline = "Deadline is required";
-    
-    // Validate links
-    newProject.links.forEach((link, index) => {
-      if (link.url && !link.title) {
-        errors[`linkTitle${index}`] = "Link title is required when URL is provided";
-      }
-      if (link.title && !link.url) {
-        errors[`linkUrl${index}`] = "URL is required when title is provided";
-      }
-      if (link.url && !isValidUrl(link.url)) {
-        errors[`linkUrl${index}`] = "Please enter a valid URL";
-      }
-    });
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  // URL validation helper
-  const isValidUrl = (url) => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
   // Submit new project
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
-
     try {
       setLoading(true);
       
@@ -108,12 +70,12 @@ export default function Projects() {
         name: newProject.name,
         description: newProject.description,
         progress: Number(newProject.progress),
-        deadline: new Date(newProject.deadline).toISOString(), // Convert to ISO string
+        deadline: new Date(newProject.deadline).toISOString(),
         links: newProject.links
           .filter(link => link.title && link.url) // Remove empty links
           .map(link => ({
             title: link.title,
-            url: link.url.startsWith('http') ? link.url : `https://${link.url}` // Ensure URL has protocol
+            url: link.url.startsWith('http') ? link.url : `https://${link.url}`
           }))
       };
 
@@ -134,10 +96,9 @@ export default function Projects() {
       }
     } catch (err) {
       console.error("Save error:", err);
-      // Display more detailed error message
       setError(err.response?.data?.error || 
               err.response?.data?.message || 
-              "Failed to save project. Please check your inputs.");
+              "Failed to save project.");
     } finally {
       setLoading(false);
     }
@@ -170,7 +131,6 @@ export default function Projects() {
       deadline: "",
       links: [{ title: "", url: "" }]
     });
-    setFormErrors({});
     setShowAddForm(false);
   };
 
@@ -223,36 +183,32 @@ export default function Projects() {
               <div className="grid gap-4 mb-6">
                 {/* Project Name */}
                 <div>
-                  <label className="block text-gray-300 mb-2">Project Name*</label>
+                  <label className="block text-gray-300 mb-2">Project Name</label>
                   <input
                     type="text"
                     name="name"
                     value={newProject.name}
                     onChange={handleInputChange}
-                    className={`w-full bg-gray-800 border ${formErrors.name ? "border-red-500" : "border-gray-700"} rounded-lg px-4 py-2 text-white focus:border-blue-400 focus:outline-none`}
-                    required
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-blue-400 focus:outline-none"
                   />
-                  {formErrors.name && <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>}
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="block text-gray-300 mb-2">Description*</label>
+                  <label className="block text-gray-300 mb-2">Description</label>
                   <textarea
                     name="description"
                     value={newProject.description}
                     onChange={handleInputChange}
-                    className={`w-full bg-gray-800 border ${formErrors.description ? "border-red-500" : "border-gray-700"} rounded-lg px-4 py-2 text-white focus:border-blue-400 focus:outline-none`}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-blue-400 focus:outline-none"
                     rows="3"
-                    required
                   />
-                  {formErrors.description && <p className="text-red-500 text-sm mt-1">{formErrors.description}</p>}
                 </div>
 
                 {/* Progress */}
                 <div>
                   <label className="block text-gray-300 mb-2">
-                    Progress ({newProject.progress}%)*
+                    Progress ({newProject.progress}%)
                   </label>
                   <input
                     type="range"
@@ -261,23 +217,20 @@ export default function Projects() {
                     max="100"
                     value={newProject.progress}
                     onChange={handleInputChange}
-                    className={`w-full ${formErrors.progress ? "border-red-500" : ""}`}
+                    className="w-full"
                   />
-                  {formErrors.progress && <p className="text-red-500 text-sm mt-1">{formErrors.progress}</p>}
                 </div>
 
                 {/* Deadline */}
                 <div>
-                  <label className="block text-gray-300 mb-2">Deadline*</label>
+                  <label className="block text-gray-300 mb-2">Deadline</label>
                   <input
                     type="date"
                     name="deadline"
                     value={newProject.deadline}
                     onChange={handleInputChange}
-                    className={`w-full bg-gray-800 border ${formErrors.deadline ? "border-red-500" : "border-gray-700"} rounded-lg px-4 py-2 text-white focus:border-blue-400 focus:outline-none`}
-                    required
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-blue-400 focus:outline-none"
                   />
-                  {formErrors.deadline && <p className="text-red-500 text-sm mt-1">{formErrors.deadline}</p>}
                 </div>
 
                 {/* Project Links */}
@@ -291,9 +244,8 @@ export default function Projects() {
                           placeholder="Link Title"
                           value={link.title}
                           onChange={(e) => handleLinkChange(index, "title", e.target.value)}
-                          className={`w-full bg-gray-800 border ${formErrors[`linkTitle${index}`] ? "border-red-500" : "border-gray-700"} rounded-lg px-4 py-2 text-white focus:border-blue-400 focus:outline-none`}
+                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-blue-400 focus:outline-none"
                         />
-                        {formErrors[`linkTitle${index}`] && <p className="text-red-500 text-sm mt-1">{formErrors[`linkTitle${index}`]}</p>}
                       </div>
                       <div className="flex-1">
                         <input
@@ -301,9 +253,8 @@ export default function Projects() {
                           placeholder="https://example.com"
                           value={link.url}
                           onChange={(e) => handleLinkChange(index, "url", e.target.value)}
-                          className={`w-full bg-gray-800 border ${formErrors[`linkUrl${index}`] ? "border-red-500" : "border-gray-700"} rounded-lg px-4 py-2 text-white focus:border-blue-400 focus:outline-none`}
+                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-blue-400 focus:outline-none"
                         />
-                        {formErrors[`linkUrl${index}`] && <p className="text-red-500 text-sm mt-1">{formErrors[`linkUrl${index}`]}</p>}
                       </div>
                       {newProject.links.length > 1 && (
                         <button
