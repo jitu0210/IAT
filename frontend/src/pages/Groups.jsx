@@ -309,10 +309,10 @@ export default function Groups() {
 
       <section className="py-12 px-4 flex-grow">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold text-blue-400 mb-6 text-center">
-            Intern Groups
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 text-center">
+            Intern's Group
           </h1>
-          <p className="text-gray-400 mb-8 text-center max-w-2xl mx-auto">
+          <p className="text-blue-400 mb-8 text-center max-w-2xl mx-auto">
             Create and manage intern groups. Each group can be rated on communication, presentation, content, usefulness for company and interns, and participation.
           </p>
 
