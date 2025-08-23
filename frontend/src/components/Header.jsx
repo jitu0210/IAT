@@ -80,7 +80,7 @@ export default function Header() {
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
               {user && (
-                <span className="hover:text-white font-bold text-yellow-400">Welcome, {user.username}</span>
+                <span className="hover:text-white font-bold text-yellow-400">Welcome {user.username}</span>
               )}
               <button
                 onClick={handleLogout}
@@ -119,7 +119,7 @@ export default function Header() {
               {isAuthenticated ? (
                 <div className="flex flex-col gap-4 py-2">
                   {user && (
-                    <span className="hover:text-white text-yellow-400 text-center">Welcome {user.username}</span>
+                    <span className="hover:text-white font-bold text-yellow-400 text-center">Welcome {user.username}</span>
                   )}
                   <button
                     onClick={() => { handleLogout(); setIsMenuOpen(false); }}
