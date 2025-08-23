@@ -31,7 +31,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link to="/" className="hover:text-blue-400 transition-colors">Home</Link></li>
               <li><Link to="/about" className="hover:text-blue-400 transition-colors">About Us</Link></li>
-              <li><Link to="/internships" className="hover:text-blue-400 transition-colors">Internships</Link></li>
+              <li><Link to="/" className="hover:text-blue-400 transition-colors">Internships</Link></li>
               <li><Link to="/contact" className="hover:text-blue-400 transition-colors">Contact</Link></li>
             </ul>
           </div>
@@ -40,10 +40,10 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Resources</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/careers" className="hover:text-blue-400 transition-colors">Careers</Link></li>
-              <li><Link to="/news" className="hover:text-blue-400 transition-colors">News & Updates</Link></li>
-              <li><Link to="/events" className="hover:text-blue-400 transition-colors">Events</Link></li>
-              <li><Link to="/support" className="hover:text-blue-400 transition-colors">Support</Link></li>
+              <li><Link to="/" className="hover:text-blue-400 transition-colors">Careers</Link></li>
+              <li><Link to="/" className="hover:text-blue-400 transition-colors">News & Updates</Link></li>
+              <li><Link to="/" className="hover:text-blue-400 transition-colors">Events</Link></li>
+              <li><Link to="/" className="hover:text-blue-400 transition-colors">Support</Link></li>
             </ul>
           </div>
 
@@ -94,9 +94,9 @@ export default function Footer() {
         <div className="border-t border-gray-800 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center text-sm">
           <p>© {new Date().getFullYear()} Aartech Solonics Limited. All Rights Reserved.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <Link to="/privacy" className="hover:text-blue-400">Privacy Policy</Link>
-            <Link to="/terms" className="hover:text-blue-400">Terms of Service</Link>
-            <Link to="/cookies" className="hover:text-blue-400">Cookie Policy</Link>
+            <Link to="/" className="hover:text-blue-400">Privacy Policy</Link>
+            <Link to="/" className="hover:text-blue-400">Terms of Service</Link>
+            <Link to="/" className="hover:text-blue-400">Cookie Policy</Link>
           </div>
         </div>
       </div>
