@@ -47,12 +47,12 @@ export default function Achievements() {
       <Header />
 
       {/* Hero Section */}
-      <section className="py-20 text-center bg-gray-900">
+      <section className="py-12 text-center bg-gray-900">
         <div className="max-w-4xl mx-auto px-6">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-blue-400 mb-4">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
             Aartech Solonics Limited Achievements
           </h1>
-          <p className="text-gray-300 text-lg md:text-xl">
+          <p className="text-blue-400 text-lg md:text-xl">
             Celebrating the milestones, innovations, and recognitions of Aartech Solonics Limited.
           </p>
         </div>
