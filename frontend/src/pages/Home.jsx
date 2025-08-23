@@ -352,7 +352,7 @@ export default function Dashboard() {
           <div className="rounded-xl bg-[#111A2E] border border-blue-900/30 p-4 hidden xl:block">
             <div className="text-sm text-gray-400">Status</div>
             <div className="mt-1 text-2xl font-bold text-indigo-300">
-              In progress...
+              Beta Version
             </div>
           </div>
         </div>

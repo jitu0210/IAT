@@ -11,7 +11,7 @@ import Groups from "./pages/Groups.jsx";
 import Interns from "./pages/Interns.jsx";
 import Projects from "./pages/Projects.jsx";
 import Activity from "./pages/Activity.jsx"
-import ProjectDetail from "./pages/ProjectDetail.jsx";
+import InternActivity from "./pages/InternActivity.jsx";
 
 function App() {
   return (
@@ -28,8 +28,8 @@ function App() {
         <Route path="/groups" element={<Groups />} />
         <Route path="/interns" element={<Interns />} />
         <Route path="/projects" element={<Projects />} />
-        <Route path="/projects/projectId" element={<ProjectDetail />} />
         <Route path="/activity" element={<Activity />} />
+        <Route path="/intern-activity" element={<InternActivity />} />
       </Routes>
     </BrowserRouter>
   );
