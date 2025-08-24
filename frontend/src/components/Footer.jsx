@@ -72,7 +72,7 @@ export default function Footer() {
               <li>Address: Mandideep,Madhya Pradesh, India</li>
             </ul>
             <div className="mt-4">
-              <h4 className="text-sm font-medium mb-2">Subscribe to Newsletter</h4>
+              <h4 className="text-sm font-medium mb-2">Subscribe Now</h4>
               <form className="flex flex-col gap-2">
                 <input
                   type="email"

@@ -26,7 +26,7 @@ connectDB()
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/form", formRoutes);
 app.use("/api/v1/projects",projectRoutes)
-app.use("/api/v1/rating",ratingRoutes)
+app.use("/api/v1/ratings",ratingRoutes)
 app.use("/api/v1/groups",groupRoutes)
 
 const PORT = process.env.PORT || 8000;

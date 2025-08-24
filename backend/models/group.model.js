@@ -96,11 +96,16 @@ const groupSchema = new mongoose.Schema({
   avgParticipation: {
     type: Number,
     default: 0
+  },
+  averageRating: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true
 });
 
+// Method to update aggregated ratings
 // Method to update aggregated ratings
 groupSchema.methods.updateRatings = function() {
   if (this.ratings.length === 0) {

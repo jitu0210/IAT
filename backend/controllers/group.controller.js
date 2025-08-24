@@ -254,9 +254,10 @@ export const addMember = async (req, res) => {
 };
 
 // Remove member from group - FIXED
+// Remove member from group - FIXED (using URL params)
 export const removeMember = async (req, res) => {
   try {
-    const { id, userId } = req.params;
+    const { id, userId } = req.params; // Get userId from URL params
     
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(404).json({ message: 'Group not found' });
@@ -278,7 +279,8 @@ export const removeMember = async (req, res) => {
     }
     
     // Check if user is a member
-    if (!group.members.includes(userId)) {
+    const isMember = group.members.some(memberId => memberId.toString() === userId);
+    if (!isMember) {
       return res.status(400).json({ message: 'User is not a member of this group' });
     }
     
