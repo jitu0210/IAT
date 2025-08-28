@@ -1,29 +1,36 @@
-import groupController from "../controllers/group.controller.js"
-import router from "express"
-import protect from './../middleware/authMiddleware.js';
+import express from "express";
+import {
+  getAllGroups,
+  getGroup,
+  joinGroup,
+  leaveGroup,
+  rateGroup,
+  removeRating,
+  initializeGroups
+} from "../controllers/group.controller.js";
+import protect from "../middleware/authMiddleware.js";
 
-// All routes are protected
-router.use(protect);
+const router = express.Router();
 
 // Get all groups
-router.get('/', groupController.getAllGroups);
+router.get("/", getAllGroups);
 
 // Get specific group
-router.get('/:groupId', groupController.getGroup);
+router.get("/:groupId", getGroup);
 
 // Join a group
-router.post('/:groupId/join', groupController.joinGroup);
+router.post("/:groupId/join", protect, joinGroup);
 
 // Leave a group
-router.post('/:groupId/leave', groupController.leaveGroup);
+router.post("/:groupId/leave", protect, leaveGroup);
 
 // Rate a group
-router.post('/:groupId/rate', groupController.rateGroup);
+router.post("/:groupId/rate", protect, rateGroup);
 
 // Remove rating
-router.delete('/:groupId/rating', groupController.removeRating);
+router.delete("/:groupId/rating", protect, removeRating);
 
 // Initialize groups (admin only)
-router.post('/initialize', groupController.initializeGroups);
+router.post("/initialize", protect, initializeGroups);
 
-export default router
+export default router;
