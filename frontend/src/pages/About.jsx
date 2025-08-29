@@ -38,7 +38,7 @@ const About = () => {
       <Header />
 
       {/* Section Navigation */}
-      <div className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? "bg-gray-900/95 py-2 shadow-xl" : "bg-gray-900/90 py-3"} backdrop-blur-md border-b border-gray-800`}>
+      <div className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? "bg-gray-900/95 py-2 shadow-xl" : "bg-gray-900/90 py-6"} backdrop-blur-md border-b border-gray-800`}>
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-2 md:gap-3">
             <button
