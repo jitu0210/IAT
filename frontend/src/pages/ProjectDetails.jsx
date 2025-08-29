@@ -1,338 +1,67 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import DatePicker from "react-datepicker";
 import { format } from "date-fns";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "react-datepicker/dist/react-datepicker.css";
+import { useParams } from "react-router-dom";
 
 export default function ProjectDetail() {
-  // Calculate equal percentage values for sections and checkpoints
-  const totalSections = 8; // Number of sections
-  const sectionPercentage = 100 / totalSections;
-
-  const project = {
-    name: "AI Accident Detection System",
-    description:
-      "This project integrates IoT sensors and AI algorithms to detect accidents in real-time and notify emergency services immediately.",
-    deadline: "2025-12-31",
-    checkpoints: [
-      // Project Initiation and Planning (9 checkpoints)
-      {
-        id: 1,
-        label: "Bid Award & Contract Review",
-        value: sectionPercentage / 9,
-        section: "Project Initiation and Planning",
-        status: "not started",
-      },
-      {
-        id: 2,
-        label: "Project Kick-off Meeting",
-        value: sectionPercentage / 9,
-        section: "Project Initiation and Planning",
-        status: "not started",
-      },
-      {
-        id: 3,
-        label: "Define Project Scope & Objectives",
-        value: sectionPercentage / 9,
-        section: "Project Initiation and Planning",
-        status: "not started",
-      },
-      {
-        id: 4,
-        label: "Stakeholder Identification & Analysis",
-        value: sectionPercentage / 9,
-        section: "Project Initiation and Planning",
-        status: "not started",
-      },
-      {
-        id: 5,
-        label: "Requirements Gathering & Analysis",
-        value: sectionPercentage / 9,
-        section: "Project Initiation and Planning",
-        status: "not started",
-      },
-      {
-        id: 6,
-        label: "Feasibility Study & Risk Assessment",
-        value: sectionPercentage / 9,
-        section: "Project Initiation and Planning",
-        status: "not started",
-      },
-      {
-        id: 7,
-        label: "Resource Planning",
-        value: sectionPercentage / 9,
-        section: "Project Initiation and Planning",
-        status: "not started",
-      },
-      {
-        id: 8,
-        label: "Budget Allocation & Financial Planning",
-        value: sectionPercentage / 9,
-        section: "Project Initiation and Planning",
-        status: "not started",
-      },
-      {
-        id: 9,
-        label: "Project Management Plan Development",
-        value: sectionPercentage / 9,
-        section: "Project Initiation and Planning",
-        status: "not started",
-      },
-
-      // Preliminary Design & Concept Development (4 checkpoints)
-      {
-        id: 10,
-        label: "Detailed Requirements Specification for Testing Unit",
-        value: sectionPercentage / 4,
-        section: "Preliminary Design & Concept Development",
-        status: "not started",
-      },
-      {
-        id: 11,
-        label: "Concept Design & Development",
-        value: sectionPercentage / 4,
-        section: "Preliminary Design & Concept Development",
-        status: "not started",
-      },
-      {
-        id: 12,
-        label: "Preliminary Design Review (PDR) Preparation",
-        value: sectionPercentage / 4,
-        section: "Preliminary Design & Concept Development",
-        status: "not started",
-      },
-      {
-        id: 13,
-        label: "PDR Presentation & Approval",
-        value: sectionPercentage / 4,
-        section: "Preliminary Design & Concept Development",
-        status: "not started",
-      },
-
-      // Detailed Design & Engineering (5 checkpoints)
-      {
-        id: 14,
-        label: "System Level Design",
-        value: sectionPercentage / 5,
-        section: "Detailed Design & Engineering",
-        status: "not started",
-      },
-      {
-        id: 15,
-        label: "Sub-System Detailed Design",
-        value: sectionPercentage / 5,
-        section: "Detailed Design & Engineering",
-        status: "not started",
-      },
-      {
-        id: 16,
-        label: "Component Selection & Sourcing Strategy",
-        value: sectionPercentage / 5,
-        section: "Detailed Design & Engineering",
-        status: "not started",
-      },
-      {
-        id: 17,
-        label: "Drawings & Documentation Package Development",
-        value: sectionPercentage / 5,
-        section: "Detailed Design & Engineering",
-        status: "not started",
-      },
-      {
-        id: 18,
-        label: "Design Validation & Simulation",
-        value: sectionPercentage / 5,
-        section: "Detailed Design & Engineering",
-        status: "not started",
-      },
-
-      // Procurement & Manufacturing (4 checkpoints)
-      {
-        id: 19,
-        label: "Bill of Material (BOM) Finalization",
-        value: sectionPercentage / 4,
-        section: "Procurement & Manufacturing",
-        status: "not started",
-      },
-      {
-        id: 20,
-        label: "Purchase Order (PO) Issuance & Tracking",
-        value: sectionPercentage / 4,
-        section: "Procurement & Manufacturing",
-        status: "not started",
-      },
-      {
-        id: 21,
-        label: "Component Manufacturing & Assembly",
-        value: sectionPercentage / 4,
-        section: "Procurement & Manufacturing",
-        status: "not started",
-      },
-      {
-        id: 22,
-        label: "Quality Control & Inspection of Manufactured Parts",
-        value: sectionPercentage / 4,
-        section: "Procurement & Manufacturing",
-        status: "not started",
-      },
-
-      // Assembly & Integration (5 checkpoints)
-      {
-        id: 23,
-        label: "Assembly & Integration",
-        value: sectionPercentage / 5,
-        section: "Assembly & Integration",
-        status: "not started",
-      },
-      {
-        id: 24,
-        label: "Sub-system Assembly",
-        value: sectionPercentage / 5,
-        section: "Assembly & Integration",
-        status: "not started",
-      },
-      {
-        id: 25,
-        label: "Integration of Sub-systems into Main Testing Unit",
-        value: sectionPercentage / 5,
-        section: "Assembly & Integration",
-        status: "not started",
-      },
-      {
-        id: 26,
-        label: "Cabling & Wiring Installation",
-        value: sectionPercentage / 5,
-        section: "Assembly & Integration",
-        status: "not started",
-      },
-      {
-        id: 27,
-        label: "Initial Power-up & Basic Functionality Tests",
-        value: sectionPercentage / 5,
-        section: "Assembly & Integration",
-        status: "not started",
-      },
-
-      // Testing & Validation (7 checkpoints)
-      {
-        id: 28,
-        label: "Factory Acceptance Test (FAT) Plan Development",
-        value: sectionPercentage / 7,
-        section: "Testing & Validation",
-        status: "not started",
-      },
-      {
-        id: 29,
-        label: "FAT Execution",
-        value: sectionPercentage / 7,
-        section: "Testing & Validation",
-        status: "not started",
-      },
-      {
-        id: 30,
-        label: "Defect Identification & Resolution",
-        value: sectionPercentage / 7,
-        section: "Testing & Validation",
-        status: "not started",
-      },
-      {
-        id: 31,
-        label: "Client/User Acceptance Test (UAT) Plan Development",
-        value: sectionPercentage / 7,
-        section: "Testing & Validation",
-        status: "not started",
-      },
-      {
-        id: 32,
-        label: "UAT Execution",
-        value: sectionPercentage / 7,
-        section: "Testing & Validation",
-        status: "not started",
-      },
-      {
-        id: 33,
-        label: "Performance & Safety Compliance Testing",
-        value: sectionPercentage / 7,
-        section: "Testing & Validation",
-        status: "not started",
-      },
-      {
-        id: 34,
-        label: "Test Report Generation & Review",
-        value: sectionPercentage / 7,
-        section: "Testing & Validation",
-        status: "not started",
-      },
-
-      // Deployment & Training (5 checkpoints)
-      {
-        id: 35,
-        label: "Packaging & Transportation of Testing Unit",
-        value: sectionPercentage / 5,
-        section: "Deployment & Training",
-        status: "not started",
-      },
-      {
-        id: 36,
-        label: "On-site Installation & Setup",
-        value: sectionPercentage / 5,
-        section: "Deployment & Training",
-        status: "not started",
-      },
-      {
-        id: 37,
-        label: "Site Acceptance Test (SAT) Execution",
-        value: sectionPercentage / 5,
-        section: "Deployment & Training",
-        status: "not started",
-      },
-      {
-        id: 38,
-        label: "Operational Training for End-Users",
-        value: sectionPercentage / 5,
-        section: "Deployment & Training",
-        status: "not started",
-      },
-      {
-        id: 39,
-        label: "Maintenance Training for Technical Staff",
-        value: sectionPercentage / 5,
-        section: "Deployment & Training",
-        status: "not started",
-      },
-
-      // Project Closure & Post-Deployment (3 checkpoints)
-      {
-        id: 40,
-        label: "Final Documentation Handover",
-        value: sectionPercentage / 3,
-        section: "Project Closure & Post-Deployment",
-        status: "not started",
-      },
-      {
-        id: 41,
-        label: "Warranty & Support Agreement Finalization",
-        value: sectionPercentage / 3,
-        section: "Project Closure & Post-Deployment",
-        status: "not started",
-      },
-      {
-        id: 42,
-        label: "Final Project Report & Financial Closure",
-        value: sectionPercentage / 3,
-        section: "Project Closure & Post-Deployment",
-        status: "not started",
-      },
-    ],
-  };
-
+  const { projectId } = useParams();
+  const [project, setProject] = useState(null);
   const [selected, setSelected] = useState([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [statuses, setStatuses] = useState({});
   const [targetDates, setTargetDates] = useState({});
   const [expandedSections, setExpandedSections] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Fetch project data from backend
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        const response = await axios.get(`https://iat-backend-5h88.onrender.com/api/v1/projects/${projectId}`);
+        const projectData = response.data;
+        
+        setProject(projectData);
+        
+        // Initialize selected checkpoints based on status
+        const completedCheckpoints = projectData.checkpoints
+          .filter(cp => cp.status === "completed")
+          .map(cp => cp._id);
+        
+        setSelected(completedCheckpoints);
+        
+        // Initialize statuses and target dates
+        const initialStatuses = {};
+        const initialTargetDates = {};
+        const initialExpandedSections = {};
+        
+        projectData.checkpoints.forEach((cp) => {
+          initialStatuses[cp._id] = cp.status;
+          initialTargetDates[cp._id] = cp.targetDate ? new Date(cp.targetDate) : new Date();
+          
+          // Initialize all sections as expanded
+          if (!initialExpandedSections[cp.section]) {
+            initialExpandedSections[cp.section] = true;
+          }
+        });
+        
+        setStatuses(initialStatuses);
+        setTargetDates(initialTargetDates);
+        setExpandedSections(initialExpandedSections);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching project:", err);
+        setError("Failed to load project details");
+        setLoading(false);
+      }
+    };
+    
+    fetchProject();
+  }, [projectId]);
 
   // Update current time every minute
   useEffect(() => {
@@ -340,71 +69,71 @@ export default function ProjectDetail() {
       setCurrentTime(new Date());
     }, 60000);
 
-    // Initialize statuses
-    const initialStatuses = {};
-    const initialTargetDates = {};
-    const initialExpandedSections = {};
-
-    project.checkpoints.forEach((cp) => {
-      initialStatuses[cp.id] = cp.status;
-      // Set default target date to 30 days from now for each checkpoint
-      const defaultDate = new Date();
-      defaultDate.setDate(defaultDate.getDate() + 30);
-      initialTargetDates[cp.id] = defaultDate;
-
-      // Initialize all sections as expanded
-      if (!initialExpandedSections[cp.section]) {
-        initialExpandedSections[cp.section] = true;
-      }
-    });
-
-    setStatuses(initialStatuses);
-    setTargetDates(initialTargetDates);
-    setExpandedSections(initialExpandedSections);
-
     return () => clearInterval(timer);
   }, []);
 
-  const handleToggle = (id) => {
-    if (selected.includes(id)) {
-      setSelected(selected.filter((x) => x !== id));
-      // When unchecking, set status back to "not started"
-      setStatuses((prev) => ({
-        ...prev,
-        [id]: "not started",
-      }));
-    } else {
-      setSelected([...selected, id]);
-      // When checking, automatically set status to "completed"
-      setStatuses((prev) => ({
-        ...prev,
-        [id]: "completed",
-      }));
+  const handleToggle = async (id) => {
+    try {
+      let newStatus;
+      let newSelected;
+      
+      if (selected.includes(id)) {
+        newSelected = selected.filter((x) => x !== id);
+        newStatus = "not started";
+      } else {
+        newSelected = [...selected, id];
+        newStatus = "completed";
+      }
+      
+      setSelected(newSelected);
+      setStatuses(prev => ({ ...prev, [id]: newStatus }));
+      
+      // Update checkpoint on backend
+      await axios.patch(
+        `https://iat-backend-5h88.onrender.com/api/v1/projects/${projectId}/checkpoints/${id}`,
+        { status: newStatus }
+      );
+    } catch (err) {
+      console.error("Error updating checkpoint:", err);
+      setError("Failed to update checkpoint");
     }
   };
 
-  const handleStatusChange = (id, newStatus) => {
-    setStatuses((prev) => ({
-      ...prev,
-      [id]: newStatus,
-    }));
-
-    // If status is changed to "completed", automatically check the checkbox
-    if (newStatus === "completed" && !selected.includes(id)) {
-      setSelected([...selected, id]);
-    }
-
-    // If status is changed from "completed" to something else, uncheck the checkbox
-    if (newStatus !== "completed" && selected.includes(id)) {
-      setSelected(selected.filter((x) => x !== id));
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      setStatuses(prev => ({ ...prev, [id]: newStatus }));
+      
+      // Update selected array based on status change
+      if (newStatus === "completed" && !selected.includes(id)) {
+        setSelected([...selected, id]);
+      } else if (newStatus !== "completed" && selected.includes(id)) {
+        setSelected(selected.filter((x) => x !== id));
+      }
+      
+      // Update checkpoint on backend
+      await axios.patch(
+        `https://iat-backend-5h88.onrender.com/api/v1/projects/${projectId}/checkpoints/${id}`,
+        { status: newStatus }
+      );
+    } catch (err) {
+      console.error("Error updating checkpoint status:", err);
+      setError("Failed to update checkpoint status");
     }
   };
 
-  const handleDateChange = (id, date) => {
-    setTargetDates((prev) => ({
-      ...prev,
-      [id]: date,
-    }));
+  const handleDateChange = async (id, date) => {
+    try {
+      setTargetDates(prev => ({ ...prev, [id]: date }));
+      
+      // Update checkpoint on backend
+      await axios.patch(
+        `https://iat-backend-5h88.onrender.com/api/v1/projects/${projectId}/checkpoints/${id}`,
+        { targetDate: date }
+      );
+    } catch (err) {
+      console.error("Error updating checkpoint date:", err);
+      setError("Failed to update target date");
+    }
   };
 
   const toggleSection = (section) => {
@@ -414,15 +143,40 @@ export default function ProjectDetail() {
     }));
   };
 
-  const progress = project.checkpoints
-    .filter((p) => selected.includes(p.id))
-    .reduce((sum, p) => sum + p.value, 0);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0B1220] text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-400 mb-4"></div>
+          <p className="text-gray-400">Loading project details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !project) {
+    return (
+      <div className="min-h-screen bg-[#0B1220] text-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 mb-4">{error || "Project not found"}</p>
+          <button 
+            onClick={() => window.history.back()}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const progress = project.progress;
 
   const completedTasks = project.checkpoints.filter((p) =>
-    selected.includes(p.id)
+    selected.includes(p._id)
   );
   const remainingTasks = project.checkpoints.filter(
-    (p) => !selected.includes(p.id)
+    (p) => !selected.includes(p._id)
   );
 
   // Group checkpoints by section
@@ -551,6 +305,13 @@ export default function ProjectDetail() {
       <Header />
 
       <main className="container mx-auto px-4 py-8 max-w-6xl">
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-900/30 border border-red-700 text-red-400 px-4 py-3 rounded-lg mb-6">
+            {error}
+          </div>
+        )}
+
         {/* Project Header */}
         <div className="mb-8 bg-gradient-to-br from-black/70 to-blue-900/30 backdrop-blur-lg rounded-2xl shadow-xl p-6 border border-blue-800">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -604,7 +365,7 @@ export default function ProjectDetail() {
               {completedTasks.length > 0 ? (
                 <ul className="text-gray-300 text-sm space-y-2 max-h-40 overflow-y-auto pr-2">
                   {completedTasks.map((t) => (
-                    <li key={t.id} className="flex items-start">
+                    <li key={t._id} className="flex items-start">
                       <span className="text-green-400 mr-2">•</span>
                       <span className="text-sm">{t.label}</span>
                     </li>
@@ -676,7 +437,7 @@ export default function ProjectDetail() {
               {remainingTasks.length > 0 ? (
                 <ul className="text-gray-300 text-sm space-y-2 max-h-40 overflow-y-auto pr-2">
                   {remainingTasks.map((t) => (
-                    <li key={t.id} className="flex items-start">
+                    <li key={t._id} className="flex items-start">
                       <span className="text-red-400 mr-2">•</span>
                       <span className="text-sm">{t.label}</span>
                     </li>
@@ -721,17 +482,17 @@ export default function ProjectDetail() {
                 {expandedSections[section] && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {checkpoints.map((cp) => {
-                      const currentStatus = statuses[cp.id] || "not started";
-                      const targetDate = targetDates[cp.id] || new Date();
+                      const currentStatus = statuses[cp._id] || "not started";
+                      const targetDate = targetDates[cp._id] || new Date();
                       const daysUntilTarget = getDaysUntilTarget(targetDate);
 
                       return (
                         <div
-                          key={cp.id}
+                          key={cp._id}
                           className={`flex flex-col p-4 rounded-xl border transition-all duration-300 ${getBorderColor(
                             currentStatus
                           )} ${
-                            selected.includes(cp.id)
+                            selected.includes(cp._id)
                               ? "bg-blue-900/30 shadow-lg scale-[1.02]"
                               : "bg-gradient-to-b from-gray-800/50 to-gray-900/70 hover:bg-gray-700/50"
                           }`}
@@ -739,8 +500,8 @@ export default function ProjectDetail() {
                           <div className="flex items-start mb-2">
                             <input
                               type="checkbox"
-                              checked={selected.includes(cp.id)}
-                              onChange={() => handleToggle(cp.id)}
+                              checked={selected.includes(cp._id)}
+                              onChange={() => handleToggle(cp._id)}
                               className="w-5 h-5 accent-blue-500 mt-0.5 flex-shrink-0 mr-3 cursor-pointer"
                             />
                             <div className="flex-1">
@@ -769,7 +530,7 @@ export default function ProjectDetail() {
                             </label>
                             <DatePicker
                               selected={targetDate}
-                              onChange={(date) => handleDateChange(cp.id, date)}
+                              onChange={(date) => handleDateChange(cp._id, date)}
                               className="text-xs p-1 rounded w-full bg-gray-700 border border-gray-600 text-white"
                               dateFormat="dd-MM-yyyy"
                               customInput={
@@ -807,7 +568,7 @@ export default function ProjectDetail() {
                             <select
                               value={currentStatus}
                               onChange={(e) =>
-                                handleStatusChange(cp.id, e.target.value)
+                                handleStatusChange(cp._id, e.target.value)
                               }
                               className={`text-xs p-1 rounded w-full bg-gray-700 border ${getBorderColor(
                                 currentStatus
