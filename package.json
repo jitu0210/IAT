@@ -1,0 +1,50 @@
+{
+  "name": "IAT",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "frontend": "cd frontend && npm start",
+    "react-build": "cd frontend && npm install && npm run build",
+    "build": "npm run react-build && npx electron-builder"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "electron": "^38.4.0",
+    "electron-builder": "^24.13.3",
+    "electron-updater": "^6.6.2",
+    "nodemon": "^3.1.10"
+  },
+  "build": {
+    "appId": "com.iat.app",
+    "productName": "IAT",
+    "directories": {
+      "output": "dist"
+    },
+    "extraFiles": [
+      {
+        "from": "node_modules/electron/dist/ffmpeg.dll",
+        "to": "."
+      }
+    ],
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ],
+    "files": [
+      "frontend/build/**/*",
+      "main.js",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}
